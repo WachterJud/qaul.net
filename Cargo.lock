@@ -1778,6 +1778,7 @@ version = "0.1.0"
 dependencies = [
  "capnp",
  "capnpc",
+ "ratman-identity",
 ]
 
 [[package]]
@@ -1998,8 +1999,11 @@ checksum = "cabe4fa914dec5870285fa7f71f602645da47c486e68486d2b4ceb4a343e90ac"
 name = "rpc-broker"
 version = "0.1.0"
 dependencies = [
+ "async-std",
  "capnp",
  "qrpc-sdk",
+ "ratman-identity",
+ "socket2",
 ]
 
 [[package]]
@@ -2184,6 +2188,18 @@ name = "smallvec"
 version = "1.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c7cb5678e1615754284ec264d9bb5b4c27d2018577fd90ac0ceb578591ed5ee4"
+
+[[package]]
+name = "socket2"
+version = "0.3.15"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b1fa70dc5c8104ec096f4fe7ede7a221d35ae13dcd19ba1ad9a81d2cab9a1c44"
+dependencies = [
+ "cfg-if",
+ "libc",
+ "redox_syscall",
+ "winapi 0.3.9",
+]
 
 [[package]]
 name = "sodiumoxide"

@@ -2,6 +2,7 @@
 //!
 //! An extensible rpc message broker for the libqaul ecosystem.
 
+mod socket;
 
 /// Hold the main broker state
 pub struct Broker {

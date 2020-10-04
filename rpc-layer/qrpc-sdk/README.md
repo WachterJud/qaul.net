@@ -11,14 +11,13 @@ functions, and type serialisation data.
 | Your service | - |   qrpc-sdk   | - |  qrpc-broker |
 +--------------+   +--------------+   +--------------+
                                               |
-                   +--------------+   +--------------+
-                   | Your UI app  | - |   qrpc-sdk   |
-                   +--------------+   +--------------+
-                     Your app UI      Deserialise types
+                   +--------------+   +--------------+   +--------------+
+                   | Your UI app  | - |   qrpc-sdk   | - |    libqaul   | 
+                   +--------------+   +--------------+   +--------------+
+                     Your app UI      Deserialise types    Main db/ router
 ```
 
-You can find more information about this layer in the [contributors
-guide][guide].
+You can find more information in the [contributors manual][m].
 
 
-[guide]: https://docs.qaul.net/contributors/technical
+[m]: https://docs.qaul.net/contributors/technical

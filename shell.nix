@@ -27,6 +27,9 @@ stdenv.mkDerivation {
     # Required for the code coverage and stuff
     openssl
 
+    # Required for the RPC protocol
+    capnproto
+    
   ] ++ (with androidenv.androidPkgs_9_0; [
     # Required for Android builds
     androidsdk

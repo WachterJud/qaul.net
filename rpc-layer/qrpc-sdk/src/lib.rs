@@ -1,5 +1,3 @@
-//! # qaul rpc sdk
-//!
 //! This library provides the basic capabilities of interacting with a
 //! qrpc-broker, and other qaul services.  These docs outline API
 //! usage and concrete types.  For an overview of concepts, consult
@@ -22,6 +20,8 @@
 //!
 //! If this is not a requirement for you, don't worry about it.
 
+pub mod io;
+
 use identity::Identity;
 
 // FIXME: currently the protocols have to be in the root of the crate
@@ -30,6 +30,13 @@ use identity::Identity;
 pub(crate) mod carrier_capnp {
     #![allow(unused)] // don't bother me pls
     include!(concat!(env!("OUT_DIR"), "/schema/carrier_capnp.rs"));
+}
+
+/// Contains concrete RPC types and APIs 
+pub mod rpc {
+    use crate::carrier_capnp::rpc_broker as rpc;
+    pub use rpc::service;
+    
 }
 
 /// A service representation on the qrpc system

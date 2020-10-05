@@ -51,7 +51,7 @@ impl<'s, T: FromPointerReader<'s>> MsgReader<'s, T> {
     ///
     /// ```
     /// # use qrpc_sdk::io::Result;
-    /// use qrpc_sdk::{io::MsgReader, rpc::service};
+    /// use qrpc_sdk::{io::MsgReader, types::service};
     ///
     /// # fn run_code() -> Result<()> {
     /// # let buf = vec![];

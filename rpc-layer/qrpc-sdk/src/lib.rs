@@ -10,15 +10,7 @@
 //! In order to interact with a running qrpc-broker instance your
 //! service needs to register itself and it's capabilities.  This
 //! mechanism is handled by this sdk.
-//!
-//! If you want other third-party services to be able to depend on
-//! your service you may want to split it into two parts: one part
-//! contains the service logic, the other type and RPC interface
-//! information.  This way a third-party service can include your
-//! services' type library (usually called `<service name>-rpc`), and
-//! gain access to all public RPC functions.
-//!
-//! If this is not a requirement for you, don't worry about it.
+
 
 pub mod io;
 
@@ -32,12 +24,25 @@ pub(crate) mod carrier_capnp {
     include!(concat!(env!("OUT_DIR"), "/schema/carrier_capnp.rs"));
 }
 
-/// Contains concrete RPC types and APIs 
-pub mod rpc {
-    use crate::carrier_capnp::rpc_broker as rpc;
-    pub use rpc::service;
-    
+/// Basic qrpc trasmission types
+///
+/// This interface is exposed to let other parts of the qrpc ecosystem
+/// parse and generate these types.  When using this library directly,
+/// try to avoid using them.  Use the main type interface documented
+/// in the root of the crate instead.
+pub mod types {
+    pub use crate::carrier_capnp::service;
 }
+
+/// Unterlying RPC message types
+///
+/// As with the data types used by this crate, try to avoid using them
+/// directly.  Instead use the main API of the crate which invoces
+/// these types internally
+pub mod rpc {
+    pub use crate::carrier_capnp::{register, unregister, upgrade};
+}
+
 
 /// A service representation on the qrpc system
 pub struct Service {

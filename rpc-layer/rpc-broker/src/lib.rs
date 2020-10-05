@@ -1,16 +1,40 @@
-//! # qaul rpc-broker
-//!
 //! An extensible rpc message broker for the libqaul ecosystem.
 
+mod parser;
 mod socket;
 
+pub use parser::UtilReader;
+
 /// Hold the main broker state
-pub struct Broker {
-    
-}
+pub struct Broker {}
 
+// #[test]
+// fn make_it_just_work_please() {
+//     use capnp::{message::Builder, serialize_packed};
+//     use qrpc_sdk::types::rpc_broker::service;
 
-/* 
+//     let mut msg = Builder::new_default();
+//     let mut service = msg.init_root::<service::Builder>();
+
+//     let d = "This is a test service to see how the RPC layer works";
+
+//     service.set_name("net.qaul.test-service");
+//     service.set_version(1);
+//     service.set_description(d.clone());
+
+//     let mut buffer = vec![];
+//     serialize_packed::write_message(&mut buffer, &msg).unwrap();
+
+//     //// Now test our de-serialisation logic
+//     let reader = UtilReader::new(buffer).unwrap();
+//     let parsed: service::Reader = reader.get_root().unwrap();
+
+//     assert_eq!(parsed.get_name().unwrap(), "net.qaul.test-service");
+//     assert_eq!(parsed.get_description().unwrap(), d);
+//     assert_eq!(parsed.get_version(), 1);
+// }
+
+/*
 Stuff I need
 
 service -> service

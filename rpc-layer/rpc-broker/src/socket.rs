@@ -1,6 +1,8 @@
 //! Wrapper module to read and write to and from an RPC socket
 //!
 
+use crate::UtilReader;
+
 use async_std::{sync::Arc, task};
 use byteorder::{BigEndian, ByteOrder};
 use socket2::{Domain, SockAddr, Socket, Type};
@@ -9,6 +11,8 @@ use std::{
     path::Path,
     sync::atomic::{AtomicBool, Ordering},
 };
+
+use qrpc_sdk::types::rpc_broker::service;
 
 pub(crate) struct RpcSocket {
     inner: Socket,
@@ -51,10 +55,11 @@ impl RpcSocket {
                 None => continue,
             };
 
-            let buf = vec![0, len];
-            if self.inner.recv(&mut buf).is_err() && continue {}
+            let mut buf = vec![0; len];
+            if self.inner.recv(buf.as_mut_slice()).is_err() && continue {}
 
-            
+            let msg = UtilReader::new(buf).unwrap();
+            let root: service::Reader = msg.get_root().unwrap();
         }
     }
 }
@@ -63,5 +68,5 @@ impl RpcSocket {
 fn read_length(sock: &Socket) -> Option<usize> {
     let mut len_buf = [0; 8];
     sock.recv(&mut len_buf).ok()?;
-    BigEndian::read_u64(&len_buf)
+    Some(BigEndian::read_u64(&len_buf) as usize)
 }

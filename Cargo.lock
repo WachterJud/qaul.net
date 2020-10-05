@@ -2000,10 +2000,12 @@ name = "rpc-broker"
 version = "0.1.0"
 dependencies = [
  "async-std",
+ "byteorder",
  "capnp",
  "qrpc-sdk",
  "ratman-identity",
  "socket2",
+ "tracing",
 ]
 
 [[package]]

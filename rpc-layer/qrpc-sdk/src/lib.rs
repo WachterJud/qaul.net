@@ -11,10 +11,7 @@
 //! service needs to register itself and it's capabilities.  This
 //! mechanism is handled by this sdk.
 
-
 pub mod io;
-
-use identity::Identity;
 
 // FIXME: currently the protocols have to be in the root of the crate
 // because of [this issue][i] in the capnproto codegen units:
@@ -43,31 +40,8 @@ pub mod rpc {
     pub use crate::carrier_capnp::{register, unregister, upgrade};
 }
 
+pub mod errors;
+mod service;
+mod socket;
 
-/// A service representation on the qrpc system
-pub struct Service {
-    name: String,
-    version: u16,
-    description: String,
-    hash_id: Option<Identity>,
-}
-
-impl Service {
-    /// Create a new service without hash_id
-    ///
-    /// The `hash_id` field will be filled in by the remote RPC server
-    /// after calling `register()`.
-    pub fn new<S: Into<String>>(name: S, version: u16, description: S) -> Self {
-        Self {
-            name: name.into(),
-            version,
-            description: description.into(),
-            hash_id: None,
-        }
-    }
-
-    /// Register this service with the RPC broker/ libqaul
-    pub async fn register(&mut self) -> Option<()> {
-        None
-    }
-}
+pub use service::Service;

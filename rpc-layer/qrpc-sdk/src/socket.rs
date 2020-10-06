@@ -1,6 +1,6 @@
 //! An internal abstraction over the RPC socket
 
-use async_std::{sync::Arc, task};
+use async_std::{future, sync::Arc, task};
 use byteorder::{BigEndian, ByteOrder};
 use socket2::{Domain, SockAddr, Socket, Type};
 use std::{
@@ -8,12 +8,22 @@ use std::{
     io::Result,
     path::Path,
     sync::atomic::{AtomicBool, Ordering},
+    time::Duration,
 };
 
+/// A qrpc connection wrapper
+///
+/// This type wraps a UNIX socket connection to a remote client.  By
+/// default it is configured in client-only mode, meaning that the
+/// only time it listens for incoming messages is when waiting for a
+/// reply from the rpc broker, libqaul, or another service.  To
+/// pro-actively reply to incoming requests (for example, if you want
+/// that your service can be used by other services)
 pub struct RpcSocket {
     inner: Socket,
     run: AtomicBool,
     listening: AtomicBool,
+    timeout: Duration,
 }
 
 impl RpcSocket {
@@ -23,8 +33,14 @@ impl RpcSocket {
     /// `listen(...)`, otherwise it will only act as a sending socket,
     /// where each reply is meant for one request.
     pub fn new<P: AsRef<Path>>(path: P) -> Result<Arc<Self>> {
-        let run = AtomicBool::from(true);
-        let listening = AtomicBool::from(false);
+        Self::with_duration(path, Duration::from_secs(5))
+    }
+
+    /// Create a new socket with an explicit timeout duration
+    ///
+    /// Setup is the same as when calling `new`, except that you can
+    /// choose an explicit timeout, instead of the default.
+    pub fn with_duration<P: AsRef<Path>>(path: P, timeout: Duration) -> Result<Arc<Self>> {
         let mut inner = Socket::new(
             Domain::unix(),
             Type::seqpacket(), // this _may_ not be supported on MacOS
@@ -34,12 +50,16 @@ impl RpcSocket {
 
         Ok(Arc::new(Self {
             inner,
-            run,
-            listening,
+            timeout,
+            run: AtomicBool::from(true),
+            listening: AtomicBool::from(false),
         }))
     }
 
     /// Start listening for connections with a future
+    ///
+    /// Incoming messages need to be parsed by your service, and then
+    /// replied to.
     pub fn listen<F>(self: &Arc<Self>, fut: F)
     where
         F: Future<Output = ()> + Send + 'static,
@@ -59,5 +79,17 @@ impl RpcSocket {
     /// Query whether this socket is listening for connections
     pub fn listening(&self) -> bool {
         self.listening.load(Ordering::Relaxed)
+    }
+
+    pub async fn send_msg(self: &Arc<Self>) -> Option<()> {
+        None
+    }
+
+    /// Drive a future to completion with a timeout
+    async fn with_timeout<T, F>(&self, fut: F) -> Option<T>
+    where
+        F: Future<Output = T> + Send + 'static,
+    {
+        future::timeout(self.timeout.clone(), fut).await.ok()
     }
 }

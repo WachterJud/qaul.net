@@ -6,21 +6,19 @@
 //! considered documentation.  If you find anything that is unclear to
 //! you, or could be commented better, please send us a patch (or MR).
 
-use qrpc_sdk::{RpcSocket, Service, default_socket_path};
+use qrpc_sdk::{default_socket_path, RpcSocket, Service};
 
 struct Ping {
     inner: Service,
 }
 
-fn main() {
-    let ping = Ping {
-        inner: Service::new(
-            "net.qaul.ping",
-            1,
-            "A simple service that says hello to everybody on the network.",
-        ),
-    };
-
-    let sock = RpcSocket::new(default_socket_path());
-    
+#[async_std::main]
+async fn main() {
+    let mut serv = Service::new(
+        "net.qaul.ping",
+        1,
+        "A simple service that says hello to everybody on the network.",
+    );
+    let sock = RpcSocket::new(default_socket_path()).unwrap();
+    serv.register(sock).await.unwrap();
 }

@@ -1,21 +1,40 @@
-//! This library provides the basic capabilities of interacting with a
-//! qrpc-broker, and other qaul services.  These docs outline API
-//! usage and concrete types.  For an overview of concepts, consult
-//! the [contributors manual][manual]
+//! A toolkit for writing clients on the qrpc message bus.  This bus
+//! is the backbone of the [qaul.net](https://qaul.net) service
+//! ecosystem.  With it you can create applications (services) that
+//! interact with `libqaul`, and other services on the same message
+//! broker.
+//!
+//! These crate docs describe the API and basic usage.  For an
+//! overview of the core concepts of this ecosystem, consult the
+//! [contributors manual][manual]
 //!
 //! [manual]: https://docs.qaul.net/contributors/technical/rpc-layer
 //!
 //! ## Using this sdk
 //!
-//! In order to interact with a running qrpc-broker instance your
-//! service needs to register itself and it's capabilities.  This
-//! mechanism is handled by this sdk.
+//! In order to interact with a running [`qrpc-broker`] instance your
+//! service needs to register itself and it's capabilities.
 //!
-//! First your service will need a place to save some state, composing
+//! First your service needs a place to save some state, composing
 //! different parts of this sdk together to create an app.  You create
 //! a [`Service`] and [`RpcSocket`] and connect to the rpc-broker
 //! socket.  First you will have to call `register(...)` on the
 //! `Service`, before any messages can be relayed to you.
+//!
+//! [`qrpc-broker`]: ../qrpc_broker/index.html
+//! [`Service`]: ./struct.Service.html
+//! [`RpcSocket`]: ./struct.RpcSocket.html
+//!
+//! ```
+//! # fn foo() -> Result<(), Box<std::error::Error>> {
+//! use qrpc_sdk::{Service, RpcSocket, default_socket_path};
+//!
+//! let serv = Service::new("com.example.myapp", 1, "A simple app");
+//! let sockt = RpcSocket::new(default_socket_path())?;
+//! serv.register(sock)?;
+//! println!("Service registered! Hash ID: {}", serv.hash_id().unwrap());
+//! # }
+//! ```
 //!
 //! Include the client-lib of the component you want to connect to,
 //! and call `establish_connection()`, privded by
@@ -59,7 +78,7 @@ pub mod types {
 /// directly.  Instead use the main API of the crate which invoces
 /// these types internally
 pub mod rpc {
-    pub use crate::carrier_capnp::{register, unregister, upgrade, carrier};
+    pub use crate::carrier_capnp::{carrier, register, unregister, upgrade};
 }
 
 pub mod builders;

@@ -13,17 +13,6 @@ fn _socket(s: &Service) -> &Arc<RpcSocket> {
 /// Use this struct to handle RPC connections to the network, and to
 /// update any data you want your service to broadcast to other
 /// participants on the QRPC system.
-///
-/// ```
-/// let my_serv = Service::new(
-///                   "de.spacekookie.myapp",
-///                   1,
-///                   "An app that does things!");
-///
-/// // Nothing happened yet. Connect to QRPC and register yourself
-/// ```
-///
-///
 pub struct Service {
     name: String,
     version: u16,
@@ -48,12 +37,21 @@ impl Service {
     }
 
     /// Register this service with the RPC broker/ libqaul
-    pub async fn register(&mut self, socket: RpcSocket) -> RpcResult<Identity> {
-        self.socket = Some(Arc::new(socket));
+    pub async fn register(&mut self, socket: Arc<RpcSocket>) -> RpcResult<Identity> {
+        self.socket = Some(socket);
         let (target, reg_msg) = builders::register(&self);
+        use crate::rpc::register;
         _socket(self)
-            .send_msg(target, reg_msg, async { todo!() })
+            .send_msg(target, reg_msg, |reader| {
+                let r: register::Reader = reader.get_root().unwrap();
+                todo!()
+            })
             .await
+    }
+
+    /// Get the `hash_id` field of this service, if it's set
+    pub fn hash_id(&self) -> Option<Identity> {
+        self.hash_id
     }
 }
 

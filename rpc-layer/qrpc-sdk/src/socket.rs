@@ -3,8 +3,10 @@
 use crate::{
     builders,
     errors::{RpcError, RpcResult},
+    io::MsgReader,
 };
 use async_std::{future, sync::Arc, task};
+use capnp::traits::FromPointerReader;
 use socket2::{Domain, SockAddr, Socket, Type};
 use std::{
     future::Future,
@@ -96,26 +98,25 @@ impl RpcSocket {
     /// need to provide a future to be run.
     ///
     /// [`io`]: ./io/index.html
-    pub async fn send_msg<F, T, S>(
-        self: &Arc<Self>,
+    pub async fn send_msg<'s, F: 'static, T, S, M: 's>(
+        self: &'s Arc<Self>,
         target: S,
         msg: Vec<u8>,
         handle: F,
     ) -> RpcResult<T>
     where
-        F: Future<Output = RpcResult<T>> + Send + 'static,
+        F: Fn(MsgReader<'s, M>) -> RpcResult<T> + Send,
         S: Into<String>,
+        M: FromPointerReader<'s>,
     {
         let msg = builders::_internal::to(target.into(), msg);
         let _self = Arc::clone(self);
         self.with_timeout(async move {
             let (_, buf) = builders::_internal::from(&_self.inner);
-
-            todo!()
+            MsgReader::new(buf).map(|ok| handle(ok))
         })
-        .await;
-
-        todo!()
+        .await?
+        .map_err(|_| RpcError::Other("Serialisation failure!".into()))?
     }
 
     /// Check if the socket is still running

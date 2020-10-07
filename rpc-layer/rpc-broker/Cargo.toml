@@ -7,10 +7,10 @@ edition = "2018"
 
 [dependencies]
 identity = { path = "../../ratman/identity", version = "0.4", package = "ratman-identity" }
+qrpc-sdk = { path = "../qrpc-sdk", version = "0.1" }
 
 async-std = "=1.5"
 byteorder = "1.0"
 capnp = "0.13"
-qrpc-sdk = { path = "../qrpc-sdk" }
 socket2 = { version = "0.3", features = ["unix"] }
 tracing = "0.1"

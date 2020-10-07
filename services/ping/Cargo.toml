@@ -7,3 +7,4 @@ edition = "2018"
 
 [dependencies]
 qrpc-sdk = { path = "../../rpc-layer/qrpc-sdk", version = "0.1" }
+async-std = { version = "=1.5", features = ["attributes"] }

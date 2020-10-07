@@ -1,4 +1,4 @@
-//! A set of type builders for the basic qrpc-sdk
+
 //!
 //! It's recommended to write similar abstraction layers in your own
 //! crate, so to make it easy for other third-party developers to use
@@ -7,6 +7,7 @@
 //! In your service you will likely not need to consume this API.  It
 //! is included for debugging purposes.
 
+use crate::Service;
 use identity::Identity;
 
 /// Generate an registry message for this service

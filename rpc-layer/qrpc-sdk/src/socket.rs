@@ -1,15 +1,27 @@
 //! An internal abstraction over the RPC socket
 
+use crate::{
+    builders,
+    errors::{RpcError, RpcResult},
+};
 use async_std::{future, sync::Arc, task};
-use byteorder::{BigEndian, ByteOrder};
 use socket2::{Domain, SockAddr, Socket, Type};
 use std::{
     future::Future,
     io::Result,
-    path::Path,
+    path::{Path, PathBuf},
     sync::atomic::{AtomicBool, Ordering},
     time::Duration,
 };
+
+/// Get the location the qrpc socket _should_ be by default
+///
+/// This default can be overridden, though!  It's safer to make this
+/// option configurable for the user, instead of only relying on the
+/// default.
+pub fn default_socket_path() -> PathBuf {
+    PathBuf::from("/run/user/1000/qrpc.socket")
+}
 
 /// A qrpc connection wrapper
 ///
@@ -21,6 +33,7 @@ use std::{
 /// that your service can be used by other services)
 pub struct RpcSocket {
     inner: Socket,
+    addr: SockAddr,
     run: AtomicBool,
     listening: AtomicBool,
     timeout: Duration,
@@ -41,15 +54,17 @@ impl RpcSocket {
     /// Setup is the same as when calling `new`, except that you can
     /// choose an explicit timeout, instead of the default.
     pub fn with_duration<P: AsRef<Path>>(path: P, timeout: Duration) -> Result<Arc<Self>> {
+        let addr = SockAddr::unix(path)?;
         let mut inner = Socket::new(
             Domain::unix(),
             Type::seqpacket(), // this _may_ not be supported on MacOS
             None,
         )?;
-        inner.connect(&SockAddr::unix(path)?)?;
+        inner.connect(&addr)?;
 
         Ok(Arc::new(Self {
             inner,
+            addr,
             timeout,
             run: AtomicBool::from(true),
             listening: AtomicBool::from(false),
@@ -68,6 +83,44 @@ impl RpcSocket {
         task::spawn(fut);
     }
 
+    /// Send a binary payload message to a specific service.
+    ///
+    /// This function needs to be called by your service when mapping
+    /// your public API to the RPC layer.  Internally all requests
+    /// will be proxied, and parsed by your service backend.
+    ///
+    /// Use the message builder functions available in [`io`] to
+    /// construct a correctly packed and compressed message.
+    ///
+    /// In order to react to the response sent by the other side, you
+    /// need to provide a future to be run.
+    ///
+    /// [`io`]: ./io/index.html
+    pub async fn send_msg<F, T, S>(
+        self: &Arc<Self>,
+        target: S,
+        msg: Vec<u8>,
+        handle: F,
+    ) -> RpcResult<T>
+    where
+        F: Future<Output = RpcResult<T>> + Send + 'static,
+        S: Into<String>,
+    {
+        let msg = builders::_internal_to(target.into(), msg);
+        let _self = Arc::clone(self);
+        self.with_timeout(async move {
+            // let len = match _self.inner.send_to(&msg, &_self.addr) {
+            //     Ok(l) => l,
+            //     Err(e) => return Err(RpcError::Other(e.to_string())),
+            // };
+
+            todo!()
+        })
+        .await;
+
+        todo!()
+    }
+
     /// Check if the socket is still running
     ///
     /// Use this function in your service's listening code to
@@ -81,15 +134,13 @@ impl RpcSocket {
         self.listening.load(Ordering::Relaxed)
     }
 
-    pub async fn send_msg(self: &Arc<Self>) -> Option<()> {
-        None
-    }
-
     /// Drive a future to completion with a timeout
-    async fn with_timeout<T, F>(&self, fut: F) -> Option<T>
+    async fn with_timeout<T, F>(&self, fut: F) -> RpcResult<T>
     where
         F: Future<Output = T> + Send + 'static,
     {
-        future::timeout(self.timeout.clone(), fut).await.ok()
+        future::timeout(self.timeout.clone(), fut)
+            .await
+            .map_err(|_| RpcError::Timeout)
     }
 }

@@ -28,3 +28,8 @@ struct Upgrade {
     resp @2 :Bool;
     
 }
+
+struct Carrier {
+    target @0 :Text;
+    data @1 :Data;
+}

@@ -1,6 +1,12 @@
-use crate::errors::ServiceResult as Result;
+use crate::errors::RpcResult;
+use crate::{builders, RpcSocket};
 use identity::Identity;
 use std::sync::Arc;
+
+/// Access the socket stored in a service
+fn _socket(s: &Service) -> &Arc<RpcSocket> {
+    s.socket.as_ref().unwrap()
+}
 
 /// A service representation on the qrpc system
 ///
@@ -15,12 +21,15 @@ use std::sync::Arc;
 ///                   "An app that does things!");
 ///
 /// // Nothing happened yet. Connect to QRPC and register yourself
-/// 
+/// ```
+///
+///
 pub struct Service {
     name: String,
     version: u16,
     description: String,
     hash_id: Option<Identity>,
+    socket: Option<Arc<RpcSocket>>,
 }
 
 impl Service {
@@ -34,12 +43,17 @@ impl Service {
             version,
             description: description.into(),
             hash_id: None,
+            socket: None,
         }
     }
 
     /// Register this service with the RPC broker/ libqaul
-    pub async fn register(&mut self) -> Option<()> {
-        None
+    pub async fn register(&mut self, socket: RpcSocket) -> RpcResult<Identity> {
+        self.socket = Some(Arc::new(socket));
+        let (target, reg_msg) = builders::register(&self);
+        _socket(self)
+            .send_msg(target, reg_msg, async { todo!() })
+            .await
     }
 }
 
@@ -57,7 +71,7 @@ impl Service {
 #[async_trait::async_trait]
 pub trait ServiceConnector: Default {
     /// Start a connection to the service backend
-    async fn establish_connection(self: Arc<Self>) -> Result<()>;
+    async fn establish_connection(self: Arc<Self>) -> RpcResult<()>;
     /// Terminate the connection to the service backend
-    async fn terminate_connection(self: Arc<Self>) -> Result<()>;
+    async fn terminate_connection(self: Arc<Self>) -> RpcResult<()>;
 }

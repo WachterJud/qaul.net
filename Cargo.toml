@@ -45,6 +45,9 @@ members = [
     "netmods/netmod-udp",
     "netmods/netmod-wd",
 
+    # Set of services in qaul.net
+    "services/ping",
+
     # android build support
     # "utils/android-support",
 

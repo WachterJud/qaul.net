@@ -36,7 +36,6 @@ use async_std::{
     task,
 };
 use bincode::serialize;
-use byteorder::{BigEndian, ByteOrder};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::{net::SocketAddr, time::Duration};
 use tracing::{error, trace};

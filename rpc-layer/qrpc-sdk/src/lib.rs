@@ -10,6 +10,28 @@
 //! In order to interact with a running qrpc-broker instance your
 //! service needs to register itself and it's capabilities.  This
 //! mechanism is handled by this sdk.
+//!
+//! First your service will need a place to save some state, composing
+//! different parts of this sdk together to create an app.  You create
+//! a [`Service`] and [`RpcSocket`] and connect to the rpc-broker
+//! socket.  First you will have to call `register(...)` on the
+//! `Service`, before any messages can be relayed to you.
+//!
+//! Include the client-lib of the component you want to connect to,
+//! and call `establish_connection()`, privded by
+//! [`ServiceConnector`].  This will establish a connection with the
+//! service to verify it's capability set.  Your service will also
+//! have to implement this mechanism to be usable by other services on
+//! the RPC bus.
+//!
+//! After that you can call functions on the public API type of the
+//! component.  You can get a copy of it via your service handle:
+//! `service.component("net.qaul.libqaul")`.
+//!
+//! If you want to see a minimal example of the smallest functional
+//! service, see the [`ping`] crate.
+//!
+//! [`ping`]: https://git.open-communication.net/qaul/qaul.net/-/tree/develop/services%2Fping/
 
 pub mod io;
 
@@ -37,11 +59,13 @@ pub mod types {
 /// directly.  Instead use the main API of the crate which invoces
 /// these types internally
 pub mod rpc {
-    pub use crate::carrier_capnp::{register, unregister, upgrade};
+    pub use crate::carrier_capnp::{register, unregister, upgrade, carrier};
 }
 
+pub mod builders;
 pub mod errors;
 mod service;
 mod socket;
 
 pub use service::Service;
+pub use socket::{default_socket_path, RpcSocket};

@@ -1,0 +1,9 @@
+[package]
+name = "ping"
+description = "A test service, demonstrating how to use libqaul, and the qrpc-sdk."
+version = "0.1.0"
+authors = ["Katharina Fey <kookie@spacekookie.de>"]
+edition = "2018"
+
+[dependencies]
+qrpc-sdk = { path = "../../rpc-layer/qrpc-sdk", version = "0.1" }

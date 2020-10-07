@@ -106,13 +106,10 @@ impl RpcSocket {
         F: Future<Output = RpcResult<T>> + Send + 'static,
         S: Into<String>,
     {
-        let msg = builders::_internal_to(target.into(), msg);
+        let msg = builders::_internal::to(target.into(), msg);
         let _self = Arc::clone(self);
         self.with_timeout(async move {
-            // let len = match _self.inner.send_to(&msg, &_self.addr) {
-            //     Ok(l) => l,
-            //     Err(e) => return Err(RpcError::Other(e.to_string())),
-            // };
+            let (_, buf) = builders::_internal::from(&_self.inner);
 
             todo!()
         })

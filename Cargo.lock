@@ -1755,9 +1755,9 @@ dependencies = [
  "netmod-tcp",
  "netmod-udp",
  "pnet",
- "qrpc-sdk",
  "ratman",
  "ratman-configure",
+ "rpc-broker",
  "tracing",
  "tracing-subscriber",
 ]

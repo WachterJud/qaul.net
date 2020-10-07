@@ -81,10 +81,11 @@ pub mod rpc {
     pub use crate::carrier_capnp::{carrier, register, unregister, upgrade};
 }
 
+mod service;
+
 pub mod builders;
 pub mod errors;
-mod service;
-mod socket;
+pub mod socket;
 
 pub use service::Service;
 pub use socket::{default_socket_path, RpcSocket};

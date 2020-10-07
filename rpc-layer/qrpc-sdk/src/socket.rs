@@ -7,7 +7,7 @@ use crate::{
 };
 use async_std::{future, sync::Arc, task};
 use capnp::traits::FromPointerReader;
-use socket2::{Domain, SockAddr, Socket, Type};
+use socket2::{Domain, Type};
 use std::{
     future::Future,
     io::Result,
@@ -16,6 +16,8 @@ use std::{
     thread,
     time::Duration,
 };
+
+pub use socket2::{SockAddr, Socket};
 
 /// Get the location the qrpc socket _should_ be by default
 ///

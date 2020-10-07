@@ -20,5 +20,9 @@ async fn main() {
         "A simple service that says hello to everybody on the network.",
     );
     let sock = RpcSocket::new(default_socket_path()).unwrap();
-    serv.register(sock).await.unwrap();
+
+    let sock2 = RpcSocket::new(default_socket_path()).unwrap();
+
+    let sock3 = RpcSocket::new(default_socket_path()).unwrap();
+//     serv.register(sock).await.unwrap();
 }

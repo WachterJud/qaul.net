@@ -12,7 +12,7 @@ netmod-tcp = { path = "../../netmods/netmod-tcp" }
 netmod-udp = { path = "../../netmods/netmod-udp" }
 ratman = { path = "../../ratman" }
 ratman-configure = { path = "../../ratman/configure" }
-qrpc-sdk = { path = "../../rpc-layer/qrpc-sdk" }
+rpc-broker = { path = "../../rpc-layer/rpc-broker" }
 
 async-std = { version = "=1.5", features = ["attributes"] }
 clap = { version = "2.0", features = ["wrap_help", "color"] }

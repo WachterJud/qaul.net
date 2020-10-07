@@ -1,7 +1,12 @@
 //! An extensible rpc message broker for the libqaul ecosystem.
 
-use qrpc_sdk::{default_socket_path, RpcSocket};
+use qrpc_sdk::{
+    default_socket_path,
+    socket::{SockAddr, Socket},
+    RpcSocket,
+};
 use std::{path::PathBuf, sync::Arc};
+use tracing::info;
 
 /// Hold the main broker state
 pub struct Broker {
@@ -9,10 +14,16 @@ pub struct Broker {
 }
 
 impl Broker {
-    pub fn new<P: Into<PathBuf>>(path: Option<P>) -> Self {
-        let path = path.map(|p| p.into()).unwrap_or(default_socket_path());
-        let sock = RpcSocket::new(path).unwrap();
+    pub fn new() -> Self {
+        let sock = RpcSocket::create(default_socket_path(), |socket, addr| {
+            Self::handle_connection(socket, addr);
+        })
+        .unwrap();
         Self { sock }
+    }
+
+    fn handle_connection(sock: Socket, addr: SockAddr) {
+        info!("Receiving connection from {:?}", addr);
     }
 }
 

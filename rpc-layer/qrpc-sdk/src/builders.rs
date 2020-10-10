@@ -7,24 +7,44 @@
 //! In your service you will likely not need to consume this API.  It
 //! is included for debugging purposes.
 
-use crate::Service;
+use crate::{
+    io::{MsgReader, Result},
+    rpc::{capabilities as cap, sdk_reply as repl},
+    Service,
+};
+use capnp::{message::Builder as Bld, serialize_packed};
 use identity::Identity;
 
 /// Generate an registry message for this service
 pub fn register(_service: &Service) -> (String, Vec<u8>) {
-    todo!()
+    ("net.qaul.rpc-broker".into(), vec![])
 }
 
 /// Generate an unregistry message for this service
 pub fn unregister(_hash_id: Identity) -> (String, Vec<u8>) {
-    todo!()
+    ("net.qaul.rpc-broker".into(), vec![])
 }
 
 /// Generate an upgrade message for this service
 pub fn upgrade(_service: &Service, _hash_id: Identity) -> (String, Vec<u8>) {
-    todo!()
+    ("net.qaul.rpc-broker".into(), vec![])
 }
 
+/// Generate a simple response error message
+pub fn resp_err() -> Vec<u8> {
+    let mut msg = Bld::new_default();
+    let mut reply = msg.init_root::<repl::Builder>();
+    reply.set_success(false);
+
+    let mut buffer = vec![];
+    serialize_packed::write_message(&mut buffer, &msg).unwrap();
+    buffer
+}
+
+/// Take a buffer of data and turn it into a reader for Capability messages
+pub fn parse_rpc_msg(buffer: Vec<u8>) -> Result<MsgReader<'static, cap::Reader<'static>>> {
+    MsgReader::new(buffer)
+}
 
 /// This module is only included for debugging reasons.  There's
 /// basically no reason to call this function directly.
@@ -55,11 +75,10 @@ pub mod _internal {
 
     /// Read an rpc message from the socket
     ///
-    /// Feel free to use this function in your
-    ///
-    /// The first field in the tuple is the destination address, the
+    /// Feel free to use this function in your service code.  The
+    /// first field in the tuple is the destination address, the
     /// second is the data payload.
-    pub fn from(socket: &Socket) -> (String, Vec<u8>) {
+    pub fn from(socket: &Socket) -> Option<(String, Vec<u8>)> {
         let mut len = vec![0; 8];
         loop {
             let (l, _) = socket.peek_from(&mut len).unwrap();
@@ -68,16 +87,16 @@ pub mod _internal {
             }
         }
 
-        let (_, _) = socket.recv_from(&mut len).unwrap();
+        let (_, _) = socket.recv_from(&mut len).ok()?;
         let len = BigEndian::read_u64(&len);
         let mut buffer = vec![0; len as usize];
-        socket.recv_from(&mut buffer).unwrap();
+        socket.recv_from(&mut buffer).ok()?;
 
-        let msg = MsgReader::new(buffer).unwrap();
+        let msg = MsgReader::new(buffer).ok()?;
         let carrier: rpc_message::Reader = msg.get_root().unwrap();
         let addr = carrier.get_addr().unwrap();
         let data = carrier.get_data().unwrap();
 
-        (addr.to_string(), data.to_vec())
+        Some((addr.to_string(), data.to_vec()))
     }
 }

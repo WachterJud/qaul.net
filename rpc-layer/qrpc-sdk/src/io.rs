@@ -61,6 +61,40 @@ impl<'s, T: FromPointerReader<'s>> MsgReader<'s, T> {
     /// # Ok(())
     /// # }
     /// ```
+    ///
+    /// Some types will be capability sets, encoded in an unnamed
+    /// union.  Because this is a very common pattern, here is an
+    /// example usage of how to implement matching for the types
+    /// defined in this crate.
+    ///
+    /// ```
+    /// use qrpc_sdk::{io::MsgReader, rpc::capabilities::{Reader, Which}};
+    /// # fn foo() -> Result<(), Box<std::error::Error>> {
+    /// # let reader = qrpc_sdk::builders::parse_rpc_msg(vec![]).unwrap();
+    /// 
+    /// // Get the `reader` by calling `builders::parse_rpc_msg(...)`
+    /// let r: Reader = reader.get_root().unwrap();
+    /// match r.which() {
+    ///     Ok(Which::Register(Ok(reg))) => handle_register(reg),
+    ///     Ok(Which::Unregister(Ok(unreg))) => handle_unregister(unreg),
+    ///     Ok(Which::Upgrade(Ok(upgr))) => handle_upgrade(uphr),
+    ///     _ => eprintln!("Invalid variant/ decode!"),
+    /// }
+    /// # Ok(())
+    /// # }
+    ///
+    /// use qrpc_sdk::rpc::{register, unregister, upgrade};
+    ///
+    /// fn handle_register(_: register::Reader) {}
+    /// fn handle_unregister(_: unregister::Reader) {}
+    /// fn handle_upgrade(_: upgrade::Reader) {}
+    /// ```
+    ///
+    /// The above code can be found in the [qrpc-broker] crate.  Your
+    /// own service code will differ, but this should give you a good
+    /// idea how to start!
+    ///
+    /// [qrpc-broker]: https://docs.qaul.net/api/qrpc_broker/index.html
     pub fn get_root(&'s self) -> Result<T> {
         self.r.get_root()
     }

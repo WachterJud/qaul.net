@@ -7,7 +7,7 @@ use crate::{
 };
 use async_std::{future, sync::Arc, task};
 use capnp::traits::FromPointerReader;
-use socket2::{Domain, Type};
+use socket2::{Domain, SockAddr, Type};
 use std::{
     future::Future,
     io::Result,
@@ -16,8 +16,19 @@ use std::{
     thread,
     time::Duration,
 };
+use tracing::error;
 
-pub use socket2::{SockAddr, Socket};
+/// A special socket address for a posix socket
+///
+/// You will usually not have to consume this type directly.  But
+/// in case you want to structure your program in a way that you
+/// need to know this type, you can access it here, instead of
+/// having to also depend on the `socket2` crate.
+#[cfg(feature = "internals")]
+pub use socket2::SockAddr as PosixAddr;
+
+/// The inner wrapped posix socket
+pub use socket2::Socket as PosixSocket;
 
 /// Get the location the qrpc socket _should_ be by default
 ///
@@ -37,7 +48,7 @@ pub fn default_socket_path() -> PathBuf {
 /// pro-actively reply to incoming requests (for example, if you want
 /// that your service can be used by other services)
 pub struct RpcSocket {
-    inner: Socket,
+    inner: PosixSocket,
     _addr: SockAddr,
     run: AtomicBool,
     listening: AtomicBool,
@@ -45,9 +56,9 @@ pub struct RpcSocket {
 }
 
 impl RpcSocket {
-    fn new_socket<P: AsRef<Path>>(path: P) -> Result<(Socket, SockAddr)> {
+    fn new_socket<P: AsRef<Path>>(path: P) -> Result<(PosixSocket, SockAddr)> {
         let addr = SockAddr::unix(path)?;
-        let socket = Socket::new(
+        let socket = PosixSocket::new(
             Domain::unix(),
             Type::seqpacket(), // this _may_ not be supported on MacOS
             None,
@@ -71,11 +82,7 @@ impl RpcSocket {
     /// connections on it, this function wraps both `new` (sort of),
     /// and `listen`, meaning that you _must_ provide a closure at
     /// this point.
-    pub fn create<P, F>(path: P, handle_connection: F) -> Result<Arc<Self>>
-    where
-        P: AsRef<Path>,
-        F: Fn(Socket, SockAddr) + Send + Sync + 'static,
-    {
+    pub fn create(path: impl AsRef<Path>) -> Result<Arc<Self>> {
         let (inner, _addr) = Self::new_socket(path)?;
         inner.bind(&_addr)?;
         inner.listen(32)?;
@@ -88,19 +95,25 @@ impl RpcSocket {
             listening: AtomicBool::from(true),
         });
 
+        Ok(arc)
+    }
+
+    /// Attach the listening part of the socket with a handle
+    pub fn start_server<F>(self: &Arc<Self>, handle: F)
+    where
+        F: Fn(Arc<Self>, SockAddr) + Send + Sync + 'static,
+    {
         // We spawn a dedicated thread because socket2 is a non-async
         // library and we don't want to accidentally deadlock our
         // whole executor on this code.  Besides, it's kinda the
         // primary hot-path on the qrpc system, so a thread might be
         // warranted.  TODO: look into how async-std can handle this!
-        let arc2 = Arc::clone(&arc);
+        let arc2 = Arc::clone(&self);
         thread::spawn(move || {
-            while let Ok((sock, addr)) = arc2.inner.accept() {
-                handle_connection(sock, addr);
+            while let Ok((_, addr)) = arc2.inner.accept() {
+                handle(Arc::clone(&arc2), addr);
             }
         });
-
-        Ok(arc)
     }
 
     /// Create a new socket with an explicit timeout duration
@@ -145,7 +158,7 @@ impl RpcSocket {
     /// need to provide a future to be run.
     ///
     /// [`io`]: ./io/index.html
-    pub async fn send_msg<'s, F: 'static, T, S, M: 's>(
+    pub async fn send_with_handle<'s, F: 'static, T, S, M: 's>(
         self: &'s Arc<Self>,
         target: S,
         msg: Vec<u8>,
@@ -159,15 +172,41 @@ impl RpcSocket {
         // First send out the message
         let msg = builders::_internal::to(target.into(), msg);
         self.inner.send(&msg).unwrap();
-        
+
         // Wait for a reply to handle
         let _self = Arc::clone(self);
         self.with_timeout(async move {
-            let (_, buf) = builders::_internal::from(&_self.inner);
-            MsgReader::new(buf).map(|ok| handle(ok))
+            match builders::_internal::from(&_self.inner) {
+                Some((_, buf)) => MsgReader::new(buf).map(|ok| handle(ok)),
+                None => Err(capnp::Error::failed("Failed to decode".into())),
+            }
         })
         .await?
         .map_err(|_| RpcError::Other("Serialisation failure!".into()))?
+    }
+
+    /// Send a message to an address, without handling responses
+    ///
+    /// This function internally prepends the length via
+    /// `builders::_internal::to()`, so don't do it again in your
+    /// code!  Use this function when replying to a service request.
+    pub fn send_raw(self: &Arc<Self>, msg: Vec<u8>, addr: Option<&SockAddr>) {
+        if match addr {
+            Some(addr) => self.inner.send_to(&msg, addr),
+            None => self.inner.send(&msg),
+        }
+        .unwrap()
+            < msg.len()
+        {
+            error!("Tried sending message, but not all bytes went through!");
+        }
+    }
+
+    /// Receive a message from this socket
+    ///
+    /// Returns None if the socket is no longer able to yield messages
+    pub fn recv(self: &Arc<Self>) -> Option<(String, Vec<u8>)> {
+        builders::_internal::from(&self.inner)
     }
 
     /// Check if the socket is still running

@@ -1,19 +1,12 @@
 //! A toolkit for writing clients on the qrpc message bus.  This bus
 //! is the backbone of the [qaul.net](https://qaul.net) service
-//! ecosystem.  With it you can create applications (services) that
-//! interact with `libqaul`, and other services on the same message
-//! broker.
+//! ecosystem.  With it you can create applications (called
+//! "services") that interact with a `libqaul` instance, and other
+//! services on the same message broker.
 //!
 //! These crate docs describe the API and basic usage.  For an
 //! overview of the core concepts of this ecosystem, consult the
 //! [contributors manual][manual].
-//!
-//! Additionally, you can access documentation of the internal
-//! utilities by passing "`--features internals`" to your cargo
-//! invocation.  These components are exposed via the API either way,
-//! but only documented on demand to not clutter the main
-//! documentation.
-//! 
 //!
 //! [manual]: https://docs.qaul.net/contributors/technical/rpc-layer
 //!
@@ -23,10 +16,14 @@
 //! service needs to register itself and it's capabilities.
 //!
 //! First your service needs a place to save some state, composing
-//! different parts of this sdk together to create an app.  You create
-//! a [`Service`] and [`RpcSocket`] and connect to the rpc-broker
-//! socket.  First you will have to call `register(...)` on the
-//! `Service`, before any messages can be relayed to you.
+//! different parts of this sdk together to create an app.
+//!
+//! You create a [`Service`] and [`RpcSocket`] and connect to the
+//! rpc-broker socket.  The first thing you do with this connection is
+//! call `register(...)` on the `Service`.  This establishes the
+//! connection, the broker saves your service in it's address lookup
+//! table, and you get assigned a hash-id to identify you in future
+//! interactions.
 //!
 //! [`qrpc-broker`]: ../qrpc_broker/index.html
 //! [`Service`]: ./struct.Service.html
@@ -38,30 +35,51 @@
 //!
 //! let serv = Service::new("com.example.myapp", 1, "A simple app");
 //! let sockt = RpcSocket::new(default_socket_path())?;
+//!
 //! serv.register(sock)?;
-//! println!("Service registered! Hash ID: {}", serv.hash_id().unwrap());
+//! println!("Service registered! ID: {}", serv.hash_id().unwrap());
 //! # }
 //! ```
 //!
-//! Include the client-lib of the component you want to connect to,
-//! and call `establish_connection()`, privded by
-//! [`ServiceConnector`].  This will establish a connection with the
-//! service to verify it's capability set.  Your service will also
-//! have to implement this mechanism to be usable by other services on
-//! the RPC bus.
+//! Next you need to include the client-lib of the component you want
+//! to use, and call `connect(...)` on your service with the component
+//! initialiser.
+//!
+//! ```
+//! use libqaul_rpc::Api;
+//! # async foo() -> Result<(), Box<std::error::Error>> {
+//! # let serv = Service::new("com.example.myapp", 1, "A simple app");
+//! # let sock = RpcSocket::new(default_socket_path())?;
+//! # serv.register(sock)?;
+//!
+//! serv.connect(libqaul_rpc::Init).await?;
+//! ```
+//!
+//! This will establish a connection with the `libqaul` component and
+//! verifies it's capability set.  This mechanism is provided by the
+//! [`ServiceConnector`].  Your service will also have to implement
+//! this mechanism to be usable by other services on the qrpc bus.
 //!
 //! [`ServiceConnector`]: ./trait.ServiceConnector.html
 //!
 //! After that you can call functions on the public API type of the
-//! component.  You can get a copy of it via your service handle:
-//! `service.component("net.qaul.libqaul")`.
+//! component.  You can get a copy of it via your service handle.
+//!
+//! ```
+//! # async foo() -> Result<(), Box<std::error::Error>> {
+//! # let serv = Service::new("com.example.myapp", 1, "A simple app");
+//! # let sock = RpcSocket::new(default_socket_path())?;
+//! # serv.register(sock)?;
+//! use libqaul_rpc::Api;
+//!
+//! let users = serv.component(libqaul_rpc::Id).list_users().await?;
+//! println!("Available users: {:?}", users);
+//! ```
 //!
 //! If you want to see a minimal example of the smallest functional
 //! service, see the [`ping`] crate.
 //!
 //! [`ping`]: https://git.open-communication.net/qaul/qaul.net/-/tree/develop/services%2Fping/
-
-pub mod io;
 
 // FIXME: currently the protocols have to be in the root of the crate
 // because of [this issue][i] in the capnproto codegen units:
@@ -91,7 +109,7 @@ pub mod types {
     pub use crate::types_capnp::service;
 }
 
-/// RPC message types used by the qrpc-sdk
+/// qrpc message types
 ///
 /// As with the data types used by this crate, try to avoid using them
 /// directly.  Instead use the main API of the crate which invoces
@@ -106,9 +124,10 @@ mod socket;
 
 pub mod builders;
 pub mod errors;
+pub mod io;
 
 pub use service::{Service, ServiceConnector};
-pub use socket::{default_socket_path, RpcSocket};
+pub use socket::{default_socket_path, PosixSocket, RpcSocket};
 
-#[cfg_attr(not(feature = "internals"), doc(hidden))]
-pub use socket::{SockAddr as PosixAddr, Socket as PosixSocket};
+#[cfg(feature = "internals")]
+pub use socket::PosixAddr;

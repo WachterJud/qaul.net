@@ -1,29 +1,61 @@
 //! An extensible rpc message broker for the libqaul ecosystem.
 
+use async_std::sync::RwLock;
 use qrpc_sdk::{
-    default_socket_path,
-    socket::{SockAddr, Socket},
-    RpcSocket,
+    builders, default_socket_path,
+    io::MsgReader,
+    rpc::capabilities::{self, Which},
+    PosixAddr, PosixSocket, RpcSocket,
 };
-use std::{path::PathBuf, sync::Arc};
-use tracing::info;
+use std::{collections::BTreeMap, sync::Arc};
+use tracing::{error, info};
+
+type CapReader = MsgReader<'static, capabilities::Reader<'static>>;
 
 /// Hold the main broker state
 pub struct Broker {
     sock: Arc<RpcSocket>,
+    connections: Arc<RwLock<BTreeMap<String, Arc<PosixSocket>>>>,
 }
 
 impl Broker {
     pub fn new() -> Self {
-        let sock = RpcSocket::create(default_socket_path(), |socket, addr| {
+        let sock = RpcSocket::create(default_socket_path()).unwrap();
+        sock.start_server(|socket, addr| {
             Self::handle_connection(socket, addr);
-        })
-        .unwrap();
-        Self { sock }
+        });
+
+        let connections = Default::default();
+        Self { sock, connections }
     }
 
-    fn handle_connection(sock: Socket, addr: SockAddr) {
-        info!("Receiving connection from {:?}", addr);
+    /// Handle connections from a single incoming socket
+    fn handle_connection(sock: Arc<RpcSocket>, src_addr: PosixAddr) {
+        info!("Receiving connection to: {:?}", src_addr);
+        loop {
+            let (_dst_addr, buffer) = match sock.recv() {
+                Some(a) => a,
+                None => break,
+            };
+
+            let capr: CapReader = match MsgReader::new(buffer) {
+                Ok(r) => r,
+                Err(_) => {
+                    sock.send_raw(builders::resp_err(), None);
+                    continue;
+                }
+            };
+
+            match capr.get_root().unwrap().which() {
+                Ok(Which::Register(Ok(reg))) => {}
+                Ok(Which::Unregister(Ok(unreg))) => {}
+                Ok(Which::Upgrade(Ok(upgr))) => {}
+                _ => {
+                    error!("Invalid capability set; dropping connection");
+                    continue;
+                }
+            }
+        }
     }
 }
 

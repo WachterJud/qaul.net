@@ -46,7 +46,7 @@ impl Service {
         // from this function as an Identity.
         use crate::rpc::sdk_reply::{Reader as ReplReader, Which as ReplWhich};
         _socket(self)
-            .send_msg(target, reg_msg, |reader| {
+            .send_with_handle(target, reg_msg, |reader| {
                 let r: ReplReader = reader.get_root().unwrap();
                 match r.which() {
                     Ok(ReplWhich::HashId(Ok(id))) => Ok(Identity::from_string(&id.to_string())),

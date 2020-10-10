@@ -1,0 +1,16 @@
+[package]
+name = "qrpc-broker"
+description = "Provide a generic RPC server to connect qaul services together"
+version = "0.1.0"
+authors = ["Kaiden Fey <kookie@spacekookie.de>"]
+edition = "2018"
+
+[dependencies]
+identity = { path = "../../ratman/identity", version = "0.5", package = "ratman-identity" }
+qrpc-sdk = { path = "../qrpc-sdk", version = "0.1", features = ["internals"] }
+
+async-std = "=1.5"
+byteorder = "1.0"
+capnp = "0.13"
+socket2 = { version = "0.3", features = ["unix"] }
+tracing = "0.1"

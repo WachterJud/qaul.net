@@ -1755,9 +1755,9 @@ dependencies = [
  "netmod-tcp",
  "netmod-udp",
  "pnet",
+ "qrpc-broker",
  "ratman",
  "ratman-configure",
- "rpc-broker",
  "tracing",
  "tracing-subscriber",
 ]
@@ -1782,8 +1782,21 @@ dependencies = [
 ]
 
 [[package]]
-name = "qrpc-sdk"
+name = "qrpc-broker"
 version = "0.1.0"
+dependencies = [
+ "async-std",
+ "byteorder",
+ "capnp",
+ "qrpc-sdk",
+ "ratman-identity",
+ "socket2",
+ "tracing",
+]
+
+[[package]]
+name = "qrpc-sdk"
+version = "0.1.1"
 dependencies = [
  "async-std",
  "async-trait",
@@ -2008,19 +2021,6 @@ name = "rle-decode-fast"
 version = "1.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cabe4fa914dec5870285fa7f71f602645da47c486e68486d2b4ceb4a343e90ac"
-
-[[package]]
-name = "rpc-broker"
-version = "0.1.0"
-dependencies = [
- "async-std",
- "byteorder",
- "capnp",
- "qrpc-sdk",
- "ratman-identity",
- "socket2",
- "tracing",
-]
 
 [[package]]
 name = "rubato"

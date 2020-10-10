@@ -12,7 +12,7 @@ use state::State;
 use std::time::Duration;
 
 use async_std::{future, task, task::Poll};
-use rpc_broker::Broker;
+use qrpc_broker::Broker;
 use std::time::Duration;
 use tracing::error;
 

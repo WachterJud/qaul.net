@@ -20,3 +20,6 @@ tracing = "0.1"
 
 [build-dependencies]
 capnpc = "0.13"
+
+[package.metadata.docs.rs]
+features = ["internals"]

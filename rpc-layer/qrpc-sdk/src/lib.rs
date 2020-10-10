@@ -9,7 +9,7 @@
 //! [contributors manual][manual].
 //!
 //! Additionally, you can access documentation of the internal
-//! utilities by passing `--features internal` to your cargo
+//! utilities by passing "`--features internals`" to your cargo
 //! invocation.  These components are exposed via the API either way,
 //! but only documented on demand to not clutter the main
 //! documentation.

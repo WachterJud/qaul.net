@@ -5,7 +5,7 @@ version = "0.1.0"
 authors = ["Kaiden Fey <kookie@spacekookie.de>"]
 edition = "2018"
 license = "GPL-3.0-or-later"
-documentation = "docs.rs/qrpc-sd"
+documentation = "https://docs.rs/qrpc-sd"
 repository = "https://git.open-communication.net/qaul/qaul.net"
 
 [features]

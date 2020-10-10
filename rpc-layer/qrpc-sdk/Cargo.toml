@@ -4,12 +4,15 @@ description = "A client SDK to build qrpc (qaul rpc) extensions"
 version = "0.1.0"
 authors = ["Kaiden Fey <kookie@spacekookie.de>"]
 edition = "2018"
+license = "GPL-3.0-or-later"
+documentation = "docs.rs/qrpc-sd"
+repository = "https://git.open-communication.net/qaul/qaul.net"
 
 [features]
 internals = []
 
 [dependencies]
-identity = { path = "../../ratman/identity", version = "0.4", package = "ratman-identity" }
+identity = { path = "../../ratman/identity", version = "0.5.0", package = "ratman-identity" }
 
 async-std = "=1.5"
 async-trait = "0.1"

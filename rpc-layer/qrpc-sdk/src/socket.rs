@@ -38,7 +38,7 @@ pub fn default_socket_path() -> PathBuf {
 /// that your service can be used by other services)
 pub struct RpcSocket {
     inner: Socket,
-    addr: SockAddr,
+    _addr: SockAddr,
     run: AtomicBool,
     listening: AtomicBool,
     timeout: Duration,
@@ -76,13 +76,13 @@ impl RpcSocket {
         P: AsRef<Path>,
         F: Fn(Socket, SockAddr) + Send + Sync + 'static,
     {
-        let (inner, addr) = Self::new_socket(path)?;
-        inner.bind(&addr)?;
+        let (inner, _addr) = Self::new_socket(path)?;
+        inner.bind(&_addr)?;
         inner.listen(32)?;
 
         let arc = Arc::new(Self {
             inner,
-            addr,
+            _addr,
             timeout: Duration::from_secs(5),
             run: AtomicBool::from(true),
             listening: AtomicBool::from(true),
@@ -108,12 +108,12 @@ impl RpcSocket {
     /// Setup is the same as when calling `new`, except that you can
     /// choose an explicit timeout, instead of the default.
     pub fn with_duration<P: AsRef<Path>>(path: P, timeout: Duration) -> Result<Arc<Self>> {
-        let (inner, addr) = Self::new_socket(path)?;
-        inner.connect(&addr)?;
+        let (inner, _addr) = Self::new_socket(path)?;
+        inner.connect(&_addr)?;
 
         Ok(Arc::new(Self {
             inner,
-            addr,
+            _addr,
             timeout,
             run: AtomicBool::from(true),
             listening: AtomicBool::from(false),
@@ -156,7 +156,11 @@ impl RpcSocket {
         S: Into<String>,
         M: FromPointerReader<'s>,
     {
+        // First send out the message
         let msg = builders::_internal::to(target.into(), msg);
+        self.inner.send(&msg).unwrap();
+        
+        // Wait for a reply to handle
         let _self = Arc::clone(self);
         self.with_timeout(async move {
             let (_, buf) = builders::_internal::from(&_self.inner);

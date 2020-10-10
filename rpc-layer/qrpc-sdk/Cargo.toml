@@ -5,6 +5,9 @@ version = "0.1.0"
 authors = ["Kaiden Fey <kookie@spacekookie.de>"]
 edition = "2018"
 
+[features]
+internals = []
+
 [dependencies]
 identity = { path = "../../ratman/identity", version = "0.4", package = "ratman-identity" }
 

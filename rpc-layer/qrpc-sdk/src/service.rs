@@ -14,9 +14,9 @@ fn _socket(s: &Service) -> &Arc<RpcSocket> {
 /// update any data you want your service to broadcast to other
 /// participants on the QRPC system.
 pub struct Service {
-    name: String,
-    version: u16,
-    description: String,
+    pub name: String,
+    pub version: u16,
+    pub description: String,
     hash_id: Option<Identity>,
     socket: Option<Arc<RpcSocket>>,
 }
@@ -40,13 +40,25 @@ impl Service {
     pub async fn register(&mut self, socket: Arc<RpcSocket>) -> RpcResult<Identity> {
         self.socket = Some(socket);
         let (target, reg_msg) = builders::register(&self);
-        use crate::rpc::register;
+
+        // Send a message to the backend and handle the reply, which
+        // needs to contain a hash_id which we parse and then return
+        // from this function as an Identity.
+        use crate::rpc::sdk_reply::{Reader as ReplReader, Which as ReplWhich};
         _socket(self)
             .send_msg(target, reg_msg, |reader| {
-                let r: register::Reader = reader.get_root().unwrap();
-                todo!()
+                let r: ReplReader = reader.get_root().unwrap();
+                match r.which() {
+                    Ok(ReplWhich::HashId(Ok(id))) => Ok(Identity::from_string(&id.to_string())),
+                    _ => todo!(), // This can still happen but I'm lazy right now
+                }
             })
             .await
+            .map(|id| {
+                // self-assign the hash-id
+                self.hash_id = Some(id);
+                id
+            })
     }
 
     /// Get the `hash_id` field of this service, if it's set

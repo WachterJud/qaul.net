@@ -6,7 +6,14 @@
 //!
 //! These crate docs describe the API and basic usage.  For an
 //! overview of the core concepts of this ecosystem, consult the
-//! [contributors manual][manual]
+//! [contributors manual][manual].
+//!
+//! Additionally, you can access documentation of the internal
+//! utilities by passing `--features internal` to your cargo
+//! invocation.  These components are exposed via the API either way,
+//! but only documented on demand to not clutter the main
+//! documentation.
+//! 
 //!
 //! [manual]: https://docs.qaul.net/contributors/technical/rpc-layer
 //!
@@ -43,6 +50,8 @@
 //! have to implement this mechanism to be usable by other services on
 //! the RPC bus.
 //!
+//! [`ServiceConnector`]: ./trait.ServiceConnector.html
+//!
 //! After that you can call functions on the public API type of the
 //! component.  You can get a copy of it via your service handle:
 //! `service.component("net.qaul.libqaul")`.
@@ -57,35 +66,49 @@ pub mod io;
 // FIXME: currently the protocols have to be in the root of the crate
 // because of [this issue][i] in the capnproto codegen units:
 // [i]: https://github.com/capnproto/capnproto-rust/issues/194
-pub(crate) mod carrier_capnp {
+pub(crate) mod base_capnp {
     #![allow(unused)] // don't bother me pls
-    include!(concat!(env!("OUT_DIR"), "/schema/carrier_capnp.rs"));
+    include!(concat!(env!("OUT_DIR"), "/schema/base_capnp.rs"));
+}
+pub(crate) mod types_capnp {
+    #![allow(unused)] // don't bother me pls
+    include!(concat!(env!("OUT_DIR"), "/schema/types_capnp.rs"));
+}
+pub(crate) mod cap_capnp {
+    #![allow(unused)] // don't bother me pls
+    include!(concat!(env!("OUT_DIR"), "/schema/cap_capnp.rs"));
 }
 
-/// Basic qrpc trasmission types
+/// qrpc message types
 ///
 /// This interface is exposed to let other parts of the qrpc ecosystem
 /// parse and generate these types.  When using this library directly,
 /// try to avoid using them.  Use the main type interface documented
 /// in the root of the crate instead.
+#[cfg_attr(not(feature = "internals"), doc(hidden))]
 pub mod types {
-    pub use crate::carrier_capnp::service;
+    pub use crate::base_capnp::rpc_message;
+    pub use crate::types_capnp::service;
 }
 
-/// Unterlying RPC message types
+/// RPC message types used by the qrpc-sdk
 ///
 /// As with the data types used by this crate, try to avoid using them
 /// directly.  Instead use the main API of the crate which invoces
 /// these types internally
+#[cfg_attr(not(feature = "internals"), doc(hidden))]
 pub mod rpc {
-    pub use crate::carrier_capnp::{carrier, register, unregister, upgrade};
+    pub use crate::cap_capnp::{capabilities, register, sdk_reply, unregister, upgrade};
 }
 
 mod service;
+mod socket;
 
 pub mod builders;
 pub mod errors;
-pub mod socket;
 
-pub use service::Service;
+pub use service::{Service, ServiceConnector};
 pub use socket::{default_socket_path, RpcSocket};
+
+#[cfg_attr(not(feature = "internals"), doc(hidden))]
+pub use socket::{SockAddr as PosixAddr, Socket as PosixSocket};

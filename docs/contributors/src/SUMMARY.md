@@ -9,7 +9,7 @@
 - [Technical](./technical/index.md)
   - [qaul.net Services](./technical/services.md)
   - [RPC layer](./technical/rpc-layer/index.md)
-    - [qrpc-sdk](./technical/rpc-layer/sdk.md)
+    - [Writing a schema](./technical/rpc-layer/schema.md)
   
   
   <!-- - [Overview of Crates](./technical/crates.md) -->

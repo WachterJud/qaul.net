@@ -1,6 +1,6 @@
 //! RPC related error handling
 
-use tracing::error;
+use std::fmt::{self, Display, Formatter};
 
 pub type RpcResult<T> = Result<T, RpcError>;
 
@@ -20,23 +20,47 @@ pub enum RpcError {
     /// Failed to perform action that requires a connection
     NotConnected,
     /// Invalid connection: performing the last operation has failed
-    ConnectionFault,
+    ConnectionFault(String),
     /// Encoding or decoding a payload failed
-    EncoderFault,
+    EncoderFault(String),
     /// Any other failure with it's error message string
     Other(String),
 }
 
-
-impl From<std::io::Error> for RpcError {
-    fn from(e: std::io::Error) -> Self {
-        error!("{}", e.to_string());
-        Self::ConnectionFault
+impl Display for RpcError {
+    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+        write!(
+            f,
+            "{}",
+            match self {
+                Self::NoSuchService => "The requested service does not exist!".into(),
+                Self::Timeout => "The requested operation took too long (timeout)!".into(),
+                Self::AlreadyConnected =>
+                    "Tried connecting to an already connected component!".into(),
+                Self::NotConnected =>
+                    "Tried to perform an action that needs a component connection!".into(),
+                Self::ConnectionFault(s) => format!("I/O error: {}", s),
+                Self::EncoderFault(s) => format!("Encode error: {}", s),
+                Self::Other(s) => format!("Unknown error: {}", s),
+            }
+        )
     }
 }
 
-impl From<capnp::Error>    for RpcError {
-    fn from(_: capnp::Error) -> Self {
-        Self::EncoderFault
+impl From<std::io::Error> for RpcError {
+    fn from(e: std::io::Error) -> Self {
+        Self::ConnectionFault(e.to_string())
+    }
+}
+
+impl From<capnp::Error> for RpcError {
+    fn from(e: capnp::Error) -> Self {
+        Self::EncoderFault(e.to_string())
+    }
+}
+
+impl From<async_std::future::TimeoutError> for RpcError {
+    fn from(_: async_std::future::TimeoutError) -> Self {
+        Self::Timeout
     }
 }

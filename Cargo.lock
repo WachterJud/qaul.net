@@ -1791,7 +1791,6 @@ dependencies = [
  "capnp",
  "capnpc",
  "ratman-identity",
- "socket2",
  "tracing",
 ]
 

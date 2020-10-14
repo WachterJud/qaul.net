@@ -14,11 +14,10 @@ internals = []
 [dependencies]
 identity = { path = "../../ratman/identity", version = "0.5.0", package = "ratman-identity" }
 
-async-std = "=1.5"
+async-std = { version = "=1.5", features = ["unstable"] }
 async-trait = "0.1"
 byteorder = "1.0"
 capnp = "0.13"
-socket2 = { version = "0.3", features = ["unix"] }
 tracing = "0.1"
 
 [build-dependencies]

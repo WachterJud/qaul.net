@@ -81,6 +81,9 @@
 //!
 //! [`ping`]: https://git.open-communication.net/qaul/qaul.net/-/tree/develop/services%2Fping/
 
+#[macro_use]
+extern crate tracing;
+
 // FIXME: currently the protocols have to be in the root of the crate
 // because of [this issue][i] in the capnproto codegen units:
 // [i]: https://github.com/capnproto/capnproto-rust/issues/194
@@ -125,9 +128,8 @@ mod socket;
 pub mod builders;
 pub mod error;
 pub mod io;
+pub mod parser;
 
+pub use identity::Identity;
 pub use service::{Service, ServiceConnector};
-pub use socket::{default_socket_path, PosixSocket, RpcSocket};
-
-#[cfg(feature = "internals")]
-pub use socket::PosixAddr;
+pub use socket::RpcSocket;

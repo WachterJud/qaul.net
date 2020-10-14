@@ -1,243 +1,222 @@
-//! An internal abstraction over the RPC socket
+//! Internal abstraction over the Rpc socket
+//!
+//! The protocol uses TCP as a transport, meaning that when sending
+//! messages, they need to be framed.  The `builder` abstraction takes
+//! care of this!  Do not manually frame your messages!
 
 use crate::{
-    builders,
     error::{RpcError, RpcResult},
-    io::MsgReader,
+    io::{self, Message},
 };
-use async_std::{future, sync::Arc, task};
-use capnp::traits::FromPointerReader;
-use socket2::{Domain, SockAddr, Type};
+use async_std::{
+    future,
+    net::{TcpListener, TcpStream},
+    stream::StreamExt,
+    sync::{channel, Arc, Mutex, Receiver, Sender},
+    task,
+};
+use identity::Identity;
 use std::{
-    clone::Clone,
-    fs,
-    future::Future,
-    io::Result,
+    collections::BTreeMap,
     net::Shutdown,
-    path::{Path, PathBuf},
     sync::atomic::{AtomicBool, Ordering},
-    thread,
     time::Duration,
 };
-use tracing::{debug, error, info, warn, trace};
 
-/// A special socket address for a posix socket
+type Lock<T> = Arc<Mutex<T>>;
+
+/// Bi-directional socket connection to a qrpc bus system
 ///
-/// You will usually not have to consume this type directly.  But
-/// in case you want to structure your program in a way that you
-/// need to know this type, you can access it here, instead of
-/// having to also depend on the `socket2` crate.
-#[cfg(feature = "internals")]
-pub use socket2::SockAddr as PosixAddr;
-
-/// The inner wrapped posix socket
-pub use socket2::Socket as PosixSocket;
-
-/// Get the location the qrpc socket _should_ be by default
+/// A connection is always between a component on the bus, and the
+/// broker.  The broker listens to incoming connections, and relays
+/// them.  A component (service, or utility library) can either
+/// operate only in sending mode, or listen as well, so that it can be
+/// used as a dependency by other services.  The sending socket is
+/// used as a listener, meaning that no specific port needs to be
+/// bound for a service.
 ///
-/// This default can be overridden, though!  It's safer to make this
-/// option configurable for the user, instead of only relying on the
-/// default.
-pub fn default_socket_path() -> PathBuf {
-    PathBuf::from("/run/user/1000/qrpc.socket")
-}
-
-/// A qrpc connection wrapper
+/// When using the `server(...)` constructor you bind a port, when
+/// attaching a lambda via `listen(...)` you use the established
+/// connection.  In your service code there is no reason to ever use
+/// `server(...)`!
 ///
-/// This type wraps a UNIX socket connection to a remote client.  By
-/// default it is configured in client-only mode, meaning that the
-/// only time it listens for incoming messages is when waiting for a
-/// reply from the rpc broker, libqaul, or another service.  To
-/// pro-actively reply to incoming requests (for example, if you want
-/// that your service can be used by other services)
+/// When sending a message, the socket will listen for a reply from
+/// the broker on the sending stream, to make sure that return data is
+/// properly associated.  You can control the timeout via the
+/// `connect_timeout` function.
 pub struct RpcSocket {
-    /// Get access to the raw underlying socket but hide it in the docs
-    #[doc(hidden)]
-    pub inner: Arc<PosixSocket>,
-    _addr: SockAddr,
-    run: AtomicBool,
+    stream: Option<TcpStream>,
+    listen: Option<Arc<TcpListener>>,
+    running: AtomicBool,
     listening: AtomicBool,
+    wfm: Lock<BTreeMap<Identity, Sender<Message>>>,
+    inc_io: (Sender<Message>, Receiver<Message>),
     timeout: Duration,
 }
 
 impl RpcSocket {
-    fn new_socket<P: AsRef<Path>>(path: P) -> Result<(PosixSocket, SockAddr)> {
-        let addr = SockAddr::unix(path)?;
-        let socket = PosixSocket::new(
-            Domain::unix(),
-            Type::seqpacket(), // this _may_ not be supported on MacOS
-            None,
-        )?;
-
-        Ok((socket, addr))
+    /// Create a client socket that connects to a remote broker
+    pub async fn connect(addr: &str, port: u16) -> RpcResult<Arc<Self>> {
+        Self::connect_timeout(addr, port, Duration::from_secs(5)).await
     }
 
-    /// Connect to an established socket to the RPC system
-    ///
-    /// To listen for new connections you need to explicitly call
-    /// `listen(...)`, otherwise it will only act as a sending socket,
-    /// where each reply is meant for one request.
-    pub fn connect<P: AsRef<Path>>(path: P) -> Result<Arc<Self>> {
-        Self::connect_duration(path, Duration::from_secs(5))
-    }
+    /// Create a client socket with an explicit timeout
+    pub async fn connect_timeout(addr: &str, port: u16, timeout: Duration) -> RpcResult<Arc<Self>> {
+        let stream = TcpStream::connect(&format!("{}:{}", addr, port)).await?;
 
-    /// Create a new socket with an explicit timeout duration
-    ///
-    /// Setup is the same as when calling `new`, except that you can
-    /// choose an explicit timeout, instead of the default.
-    pub fn connect_duration<P: AsRef<Path>>(path: P, timeout: Duration) -> Result<Arc<Self>> {
-        let (inner, _addr) = Self::new_socket(path)?;
-        inner.connect(&_addr)?;
-
-        Ok(Arc::new(Self {
-            inner: Arc::new(inner),
-            _addr,
+        let _self = Arc::new(Self {
+            stream: Some(stream),
+            listen: None,
+            running: true.into(),
+            listening: false.into(),
+            wfm: Default::default(),
+            inc_io: channel(4),
             timeout,
-            run: AtomicBool::from(true),
-            listening: AtomicBool::from(false),
-        }))
-    }
-
-    /// Create a new QRPC socket.  This function is meant for servers
-    ///
-    /// Because creating the socket is synonymous with listening for
-    /// connections on it, this function wraps both `new` (sort of),
-    /// and `listen`, meaning that you _must_ provide a closure at
-    /// this point.
-    pub fn create(path: impl AsRef<Path> + Clone) -> Result<Arc<Self>> {
-        let (inner, _addr) = Self::new_socket(path.clone())?;
-        if let Err(_) = inner.bind(&_addr) {
-            warn!("Existing socket found...killing it first!");
-            fs::remove_file(path)?;
-            inner.bind(&_addr)?;
-        }
-        inner.listen(32)?;
-        debug!("Setting socket to LISTEN=32");
-
-        let arc = Arc::new(Self {
-            inner: Arc::new(inner),
-            _addr,
-            timeout: Duration::from_secs(5),
-            run: AtomicBool::from(true),
-            listening: AtomicBool::from(true),
         });
 
-        Ok(arc)
+        _self.spawn_incoming();
+        Ok(_self)
     }
 
-    /// Attach the listening part of the socket with a handle
-    pub fn start_server<F>(self: &Arc<Self>, handle: F)
-    where
-        F: Fn(Arc<Self>, PosixSocket, SockAddr) + Send + 'static,
-    {
-        info!("Listening for incoming socket connetions...");
-        // We spawn a dedicated thread because socket2 is a non-async
-        // library and we don't want to accidentally deadlock our
-        // whole executor on this code.  Besides, it's kinda the
-        // primary hot-path on the qrpc system, so a thread might be
-        // warranted.  TODO: look into how async-std can handle this!
-        let arc2 = Arc::clone(&self);
-        thread::spawn(move || {
-            while let Ok((ps, addr)) = arc2.inner.accept() {
-                handle(Arc::clone(&arc2), ps, addr);
+    /// Attach a permanent listener to the sending stream
+    pub async fn listen<F: Fn(Message) + Send + 'static>(self: &Arc<Self>, cb: F) {
+        let _self = Arc::clone(self);
+        _self.listening.swap(true, Ordering::Relaxed);
+        task::spawn(async move {
+            while let Some(msg) = _self.inc_io.1.recv().await {
+                cb(msg);
             }
         });
     }
 
-    /// Send a binary payload message to a specific service.
+    /// Bind a socket to listen for connections
     ///
-    /// This function needs to be called by your service when mapping
-    /// your public API to the RPC layer.  Internally all requests
-    /// will be proxied, and parsed by your service backend.
+    /// This function is primarily used by the qrpc-broker and should
+    /// not be used in your service code.  To listen for incoming
+    /// connections on the outgoing stream (meaning client side), use
+    /// `listen(...)`
+    pub async fn server<F: Fn(TcpStream) + Send + Copy + 'static>(
+        addr: &str,
+        port: u16,
+        cb: F,
+    ) -> RpcResult<Arc<Self>> {
+        let listen = Arc::new(TcpListener::bind(format!("{}:{}", addr, port)).await?);
+        let _self = Arc::new(Self {
+            stream: None,
+            listen: Some(listen),
+            running: true.into(),
+            listening: true.into(),
+            wfm: Default::default(),
+            inc_io: channel(4),
+            timeout: Duration::from_secs(5),
+        });
+
+        let s = Arc::clone(&_self);
+        task::spawn(async move {
+            let mut inc = s.listen.as_ref().unwrap().incoming();
+            while let Some(Ok(stream)) = inc.next().await {
+                if !s.running() {
+                    break;
+                }
+
+                task::spawn(async move { cb(stream) });
+            }
+
+            info!("Terminating rpc accept loop...");
+        });
+
+        Ok(_self)
+    }
+
+    /// Handle the incoming side of the stream connection
     ///
-    /// Use the message builder functions available in [`io`] to
-    /// construct a correctly packed and compressed message.
+    /// When acting as a server this is simple: all messages can be
+    /// received at the same point, spawning tasks for each connection
+    /// to not mix things up.  On the client side this is harder.  We
+    /// need to listen for incoming messages after sending one, so
+    /// that we can handle the return data.  But we also need to
+    /// generally handle incoming messages.  To avoid having to peek
+    /// into the socket periodically to check if a message has
+    /// arrived, this mechanism uses channels, and an enum type to
+    /// associate message IDs.
+    fn spawn_incoming(self: &Arc<Self>) {
+        let _self = Arc::clone(self);
+        task::spawn(async move {
+            let mut sock = _self.stream.clone().unwrap();
+            while _self.running.load(Ordering::Relaxed) {
+                let msg = match io::recv(&mut sock).await {
+                    Ok(msg) => msg,
+                    Err(e) => {
+                        error!("Failed reading message: {}", e.to_string());
+                        continue;
+                    }
+                };
+
+                let id = msg.id;
+                let mut wfm = _self.wfm.lock().await;
+                match wfm.get(&id) {
+                    Some(sender) => sender.send(msg).await,
+                    None => _self.inc_io.0.send(msg).await,
+                }
+
+                wfm.remove(&id);
+            }
+        });
+    }
+
+    /// Send a message to the other side of this stream
     ///
-    /// In order to react to the response sent by the other side, you
-    /// need to provide a future to be run.
+    /// This function is meant to be used by qrpc clients that only
+    /// have a single connection stream to the broker.  If you wanted
+    /// to write an alternative message broker, you have to use the
+    /// [`io`] utilities directly (as the `qrpc-broker` crate does)!
+    ///
+    /// After sending a message this function will wait for a reply
+    /// and parse the message for you.  You must provide a conversion
+    /// lambda so that the types can be extracted from the message
+    /// type that the SDK receives.
     ///
     /// [`io`]: ./io/index.html
-    pub async fn send_with_handle<'s, F: 'static, T, S, M: 's>(
-        self: &'s Arc<Self>,
-        sock: Arc<PosixSocket>,
-        target: S,
-        msg: Vec<u8>,
-        handle: F,
-    ) -> RpcResult<T>
+    pub async fn send<T, F>(self: &Arc<Self>, msg: Message, convert: F) -> RpcResult<T>
     where
-        F: Fn(MsgReader<'s, M>) -> RpcResult<T> + Send,
-        S: Into<String>,
-        M: FromPointerReader<'s>,
+        F: Fn(Message) -> RpcResult<T>,
     {
-        // First send out the message
-        let msg = builders::_internal::to(target.into(), msg);
-        trace!("Sending {} bytes", msg.len());
-        sock.send(&msg).unwrap();
+        // Insert a receive hook for the message we are about to send
+        let id = msg.id;
+        let (tx, rx) = channel(1);
+        self.wfm.lock().await.insert(id, tx);
 
-        // Wait for a reply to handle
-        let _self = Arc::clone(self);
-        self.with_timeout(async move {
-            match builders::_internal::from(sock.as_ref()) {
-                // This match is essentially a ? but in a closure
-                Ok((_, buf)) => match MsgReader::new(buf).map(|ok| handle(ok)) {
-                    Ok(f) => f,
-                    Err(e) => Err(e.into()),
-                },
-                Err(e) => Err(e.into()),
+        // Send off the message...
+        let mut s = self.stream.clone().unwrap();
+        io::send(&mut s, msg).await?;
+
+        // Wait for a reply
+        future::timeout(self.timeout, async move {
+            match rx.recv().await {
+                Some(msg) => convert(msg),
+                None => Err(RpcError::ConnectionFault(
+                    "No message with matching ID received!".into(),
+                )),
             }
         })
-        .await
-        .map_err(|_| RpcError::Other("Serialisation failure!".into()))?
+        .await?
     }
 
-    /// Send a message to an address, without handling responses
-    ///
-    /// This function internally prepends the length via
-    /// `builders::_internal::to()`, so don't do it again in your
-    /// code!  Use this function when replying to a service request.
-    pub fn send_raw(self: &Arc<Self>, sock: &PosixSocket, msg: Vec<u8>, addr: Option<&SockAddr>) {
-        if match addr {
-            Some(addr) => sock.send_to(&msg, addr),
-            None => sock.send(&msg),
-        }
-        .unwrap()
-            < msg.len()
-        {
-            error!("Tried sending message, but not all bytes went through!");
+    /// Terminate all workers associated with this socket
+    pub fn shutdown(self: &Arc<Self>) {
+        self.running.swap(false, Ordering::Relaxed);
+        if let Some(ref s) = self.stream {
+            s.shutdown(Shutdown::Both).unwrap();
         }
     }
 
-    /// Receive a message from this socket
-    ///
-    /// Returns None if the socket is no longer able to yield messages
-    pub fn recv(self: &Arc<Self>, sock: &PosixSocket) -> RpcResult<(String, Vec<u8>)> {
-        builders::_internal::from(sock)
-    }
-
-    /// Check if the socket is still running
-    ///
-    /// Use this function in your service's listening code to
-    /// determine whether the connection should be shut-down
+    /// Get the current running state
     pub fn running(&self) -> bool {
-        self.run.load(Ordering::Relaxed)
+        self.running.load(Ordering::Relaxed)
     }
 
-    /// Query whether this socket is listening for connections
+    /// Get the current listening state
     pub fn listening(&self) -> bool {
         self.listening.load(Ordering::Relaxed)
-    }
-
-    /// Drive a future to completion with a timeout
-    async fn with_timeout<T, F>(&self, fut: F) -> RpcResult<T>
-    where
-        F: Future<Output = T> + Send + 'static,
-    {
-        future::timeout(self.timeout.clone(), fut)
-            .await
-            .map_err(|_| RpcError::Timeout)
-    }
-
-    pub fn shutdown(&self, sock: &PosixSocket) -> Option<()> {
-        sock.shutdown(Shutdown::Both).ok()
     }
 }

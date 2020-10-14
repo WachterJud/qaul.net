@@ -1,5 +1,7 @@
 //! RPC related error handling
 
+use tracing::error;
+
 pub type RpcResult<T> = Result<T, RpcError>;
 
 /// A set of errors that occur when connecting to services
@@ -27,7 +29,8 @@ pub enum RpcError {
 
 
 impl From<std::io::Error> for RpcError {
-    fn from(_: std::io::Error) -> Self {
+    fn from(e: std::io::Error) -> Self {
+        error!("{}", e.to_string());
         Self::ConnectionFault
     }
 }

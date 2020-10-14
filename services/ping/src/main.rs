@@ -7,22 +7,39 @@
 //! you, or could be commented better, please send us a patch (or MR).
 
 use qrpc_sdk::{default_socket_path, RpcSocket, Service};
+use tracing::info;
+use tracing_subscriber::{filter::LevelFilter, fmt, EnvFilter};
 
 struct Ping {
     inner: Service,
 }
 
+pub(crate) fn parse_log_level() {
+    let filter = EnvFilter::try_from_env("QAUL_LOG")
+        .unwrap_or_default()
+        .add_directive(LevelFilter::TRACE.into())
+        .add_directive("async_std=error".parse().unwrap())
+        .add_directive("mio=error".parse().unwrap());
+
+    // Initialise the logger
+    fmt().with_env_filter(filter).init();
+    info!("Initialised logger: welcome to net.qaul.ping!");
+}
+
 #[async_std::main]
 async fn main() {
+    parse_log_level();
+
     let mut serv = Service::new(
         "net.qaul.ping",
         1,
         "A simple service that says hello to everybody on the network.",
     );
-    let sock = RpcSocket::new(default_socket_path()).unwrap();
+    let sock = RpcSocket::connect(default_socket_path()).unwrap();
+    serv.register(sock).await.unwrap();
 
-    let sock2 = RpcSocket::new(default_socket_path()).unwrap();
+    //     let sock2 = RpcSocket::new(default_socket_path()).unwrap();
 
-    let sock3 = RpcSocket::new(default_socket_path()).unwrap();
-//     serv.register(sock).await.unwrap();
+    //     let sock3 = RpcSocket::new(default_socket_path()).unwrap();
+    // //     serv.register(sock).await.unwrap();
 }

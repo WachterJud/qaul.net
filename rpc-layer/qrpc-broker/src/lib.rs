@@ -1,7 +1,9 @@
 //! An extensible rpc message broker for the libqaul ecosystem.
 
 mod exit;
+mod protocol;
 
+use crate::protocol::Message;
 use async_std::{sync::RwLock, task};
 use identity::Identity;
 use qrpc_sdk::{
@@ -13,9 +15,7 @@ use qrpc_sdk::{
     PosixAddr, PosixSocket, RpcSocket,
 };
 use std::{collections::BTreeMap, sync::Arc};
-use tracing::{debug, error, info};
-
-type CapReader = MsgReader<'static, capabilities::Reader<'static>>;
+use tracing::{debug, error, info, trace};
 
 pub struct ServiceEntry {
     addr: Arc<PosixAddr>,
@@ -36,8 +36,10 @@ impl Broker {
         let this = Arc::new(Self { sock, connections });
 
         let _this = Arc::clone(&this);
-        this.sock.start_server(move |socket, addr| {
-            task::block_on(async { _this.handle_connection(socket, addr).await });
+        this.sock.start_server(move |rpc, sock, addr| {
+            let rpc = Arc::clone(&rpc);
+            let t = Arc::clone(&_this);
+            task::spawn(async move { t.handle_connection(rpc, sock, addr).await });
         });
 
         // Make sure we clean up the socket when we exti
@@ -47,12 +49,17 @@ impl Broker {
     }
 
     /// Handle connections from a single incoming socket
-    async fn handle_connection(self: &Arc<Self>, sock: Arc<RpcSocket>, src_addr: PosixAddr) {
-        info!("Receiving connection to: {:?}", src_addr);
+    async fn handle_connection(
+        self: Arc<Self>,
+        rpc: Arc<RpcSocket>,
+        sock: PosixSocket,
+        src_addr: PosixAddr,
+    ) {
+        info!("Receiving connection from: {:?}", src_addr);
         let src_addr = Arc::new(src_addr);
 
         loop {
-            let (_dst_addr, buffer) = match sock.recv() {
+            let (_dst_addr, buffer) = match rpc.recv(&sock) {
                 Ok(a) => {
                     debug!("Receiving incoming message...");
                     a
@@ -67,59 +74,30 @@ impl Broker {
                 }
             };
 
-            let capr: CapReader = match MsgReader::new(buffer) {
-                Ok(r) => r,
-                Err(_) => {
-                    sock.send_raw(builders::resp_bool(false), None);
-                    continue;
-                }
-            };
-
-            debug!("Parsing message");
-
-            match capr.get_root().unwrap().which() {
-                // Registering means needing to insert the service and report either ok or not
-                Ok(Which::Register(Ok(reg))) => {
-                    let sr: service::Reader = match reg.get_service() {
-                        Ok(r) => r,
-                        Err(_) => continue,
-                    };
-
-                    let name = match sr.get_name() {
-                        Ok(n) => n,
-                        Err(_) => {
-                            sock.send_raw(builders::resp_bool(false), Some(src_addr.as_ref()));
-                            continue;
-                        }
-                    };
-                    info!("Registering new service: {}", name);
-
-                    if let Some(id) = self
-                        .add_new_service(name.to_string(), Arc::clone(&src_addr))
-                        .await
+            trace!("Parsing carrier message...");
+            match protocol::parse_carrier(buffer) {
+                Some(Message::Command(buf)) => {
+                    if protocol::handle_broker_cmd(
+                        Arc::clone(&self),
+                        Arc::clone(&rpc),
+                        Arc::clone(&src_addr),
+                        &sock,
+                        buf,
+                    )
+                    .is_none()
                     {
-                        sock.send_raw(builders::resp_id(id), Some(src_addr.as_ref()));
-                    } else {
-                        sock.send_raw(builders::resp_bool(false), Some(src_addr.as_ref()));
+                        error!("Failed to execute broker command: skipping!");
                         continue;
                     }
                 }
-                Ok(Which::Unregister(Ok(unreg))) => {
-                    let id = match unreg.get_hash_id() {
-                        Ok(n) => n,
-                        Err(_) => {
-                            sock.send_raw(builders::resp_bool(false), Some(src_addr.as_ref()));
-                            continue;
-                        }
-                    };
-
-                    let id = Identity::from_string(&id.to_string());
-                    self.remove_service_by_id(id).await;
-                    sock.send_raw(builders::resp_bool(true), Some(src_addr.as_ref()));
-                }
-                Ok(Which::Upgrade(Ok(_))) => todo!(),
-                _ => {
-                    error!("Invalid capability set; dropping connection");
+                Some(Message::Relay { addr, data }) => match self.get_service(&addr).await {
+                    Some(addr) => rpc.send_raw(&sock, data, Some(addr.as_ref())),
+                    None => {
+                        rpc.send_raw(&sock, builders::resp_bool(false), Some(src_addr.as_ref()))
+                    }
+                },
+                None => {
+                    error!("Failed parsing carrier frame: skipping!");
                     continue;
                 }
             }

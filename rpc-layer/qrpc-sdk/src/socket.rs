@@ -19,7 +19,7 @@ use std::{
     thread,
     time::Duration,
 };
-use tracing::{debug, error, info, warn};
+use tracing::{debug, error, info, warn, trace};
 
 /// A special socket address for a posix socket
 ///
@@ -51,7 +51,9 @@ pub fn default_socket_path() -> PathBuf {
 /// pro-actively reply to incoming requests (for example, if you want
 /// that your service can be used by other services)
 pub struct RpcSocket {
-    inner: PosixSocket,
+    /// Get access to the raw underlying socket but hide it in the docs
+    #[doc(hidden)]
+    pub inner: Arc<PosixSocket>,
     _addr: SockAddr,
     run: AtomicBool,
     listening: AtomicBool,
@@ -75,8 +77,25 @@ impl RpcSocket {
     /// To listen for new connections you need to explicitly call
     /// `listen(...)`, otherwise it will only act as a sending socket,
     /// where each reply is meant for one request.
-    pub fn new<P: AsRef<Path>>(path: P) -> Result<Arc<Self>> {
-        Self::with_duration(path, Duration::from_secs(5))
+    pub fn connect<P: AsRef<Path>>(path: P) -> Result<Arc<Self>> {
+        Self::connect_duration(path, Duration::from_secs(5))
+    }
+
+    /// Create a new socket with an explicit timeout duration
+    ///
+    /// Setup is the same as when calling `new`, except that you can
+    /// choose an explicit timeout, instead of the default.
+    pub fn connect_duration<P: AsRef<Path>>(path: P, timeout: Duration) -> Result<Arc<Self>> {
+        let (inner, _addr) = Self::new_socket(path)?;
+        inner.connect(&_addr)?;
+
+        Ok(Arc::new(Self {
+            inner: Arc::new(inner),
+            _addr,
+            timeout,
+            run: AtomicBool::from(true),
+            listening: AtomicBool::from(false),
+        }))
     }
 
     /// Create a new QRPC socket.  This function is meant for servers
@@ -96,7 +115,7 @@ impl RpcSocket {
         debug!("Setting socket to LISTEN=32");
 
         let arc = Arc::new(Self {
-            inner,
+            inner: Arc::new(inner),
             _addr,
             timeout: Duration::from_secs(5),
             run: AtomicBool::from(true),
@@ -109,7 +128,7 @@ impl RpcSocket {
     /// Attach the listening part of the socket with a handle
     pub fn start_server<F>(self: &Arc<Self>, handle: F)
     where
-        F: Fn(Arc<Self>, SockAddr) + Send + Sync + 'static,
+        F: Fn(Arc<Self>, PosixSocket, SockAddr) + Send + 'static,
     {
         info!("Listening for incoming socket connetions...");
         // We spawn a dedicated thread because socket2 is a non-async
@@ -119,39 +138,10 @@ impl RpcSocket {
         // warranted.  TODO: look into how async-std can handle this!
         let arc2 = Arc::clone(&self);
         thread::spawn(move || {
-            while let Ok((_, addr)) = arc2.inner.accept() {
-                handle(Arc::clone(&arc2), addr);
+            while let Ok((ps, addr)) = arc2.inner.accept() {
+                handle(Arc::clone(&arc2), ps, addr);
             }
         });
-    }
-
-    /// Create a new socket with an explicit timeout duration
-    ///
-    /// Setup is the same as when calling `new`, except that you can
-    /// choose an explicit timeout, instead of the default.
-    pub fn with_duration<P: AsRef<Path>>(path: P, timeout: Duration) -> Result<Arc<Self>> {
-        let (inner, _addr) = Self::new_socket(path)?;
-        inner.connect(&_addr)?;
-
-        Ok(Arc::new(Self {
-            inner,
-            _addr,
-            timeout,
-            run: AtomicBool::from(true),
-            listening: AtomicBool::from(false),
-        }))
-    }
-
-    /// Start listening for connections with a future
-    ///
-    /// Incoming messages need to be parsed by your service, and then
-    /// replied to.
-    pub fn listen<F>(self: &Arc<Self>, fut: F)
-    where
-        F: Future<Output = ()> + Send + 'static,
-    {
-        self.listening.fetch_or(true, Ordering::Relaxed);
-        task::spawn(fut);
     }
 
     /// Send a binary payload message to a specific service.
@@ -169,6 +159,7 @@ impl RpcSocket {
     /// [`io`]: ./io/index.html
     pub async fn send_with_handle<'s, F: 'static, T, S, M: 's>(
         self: &'s Arc<Self>,
+        sock: Arc<PosixSocket>,
         target: S,
         msg: Vec<u8>,
         handle: F,
@@ -180,12 +171,13 @@ impl RpcSocket {
     {
         // First send out the message
         let msg = builders::_internal::to(target.into(), msg);
-        self.inner.send(&msg).unwrap();
+        trace!("Sending {} bytes", msg.len());
+        sock.send(&msg).unwrap();
 
         // Wait for a reply to handle
         let _self = Arc::clone(self);
         self.with_timeout(async move {
-            match builders::_internal::from(&_self.inner) {
+            match builders::_internal::from(sock.as_ref()) {
                 // This match is essentially a ? but in a closure
                 Ok((_, buf)) => match MsgReader::new(buf).map(|ok| handle(ok)) {
                     Ok(f) => f,
@@ -203,10 +195,10 @@ impl RpcSocket {
     /// This function internally prepends the length via
     /// `builders::_internal::to()`, so don't do it again in your
     /// code!  Use this function when replying to a service request.
-    pub fn send_raw(self: &Arc<Self>, msg: Vec<u8>, addr: Option<&SockAddr>) {
+    pub fn send_raw(self: &Arc<Self>, sock: &PosixSocket, msg: Vec<u8>, addr: Option<&SockAddr>) {
         if match addr {
-            Some(addr) => self.inner.send_to(&msg, addr),
-            None => self.inner.send(&msg),
+            Some(addr) => sock.send_to(&msg, addr),
+            None => sock.send(&msg),
         }
         .unwrap()
             < msg.len()
@@ -218,8 +210,8 @@ impl RpcSocket {
     /// Receive a message from this socket
     ///
     /// Returns None if the socket is no longer able to yield messages
-    pub fn recv(self: &Arc<Self>) -> RpcResult<(String, Vec<u8>)> {
-        builders::_internal::from(&self.inner)
+    pub fn recv(self: &Arc<Self>, sock: &PosixSocket) -> RpcResult<(String, Vec<u8>)> {
+        builders::_internal::from(sock)
     }
 
     /// Check if the socket is still running
@@ -245,7 +237,7 @@ impl RpcSocket {
             .map_err(|_| RpcError::Timeout)
     }
 
-    pub fn shutdown(&self) -> Option<()> {
-        self.inner.shutdown(Shutdown::Both).ok()
+    pub fn shutdown(&self, sock: &PosixSocket) -> Option<()> {
+        sock.shutdown(Shutdown::Both).ok()
     }
 }

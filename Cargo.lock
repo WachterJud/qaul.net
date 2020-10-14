@@ -1550,6 +1550,8 @@ version = "0.1.0"
 dependencies = [
  "async-std",
  "qrpc-sdk",
+ "tracing",
+ "tracing-subscriber",
 ]
 
 [[package]]

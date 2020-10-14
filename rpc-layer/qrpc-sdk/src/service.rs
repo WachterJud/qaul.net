@@ -45,20 +45,21 @@ impl Service {
         // needs to contain a hash_id which we parse and then return
         // from this function as an Identity.
         use crate::rpc::sdk_reply::{Reader as ReplReader, Which as ReplWhich};
-        _socket(self)
-            .send_with_handle(target, reg_msg, |reader| {
-                let r: ReplReader = reader.get_root().unwrap();
-                match r.which() {
-                    Ok(ReplWhich::HashId(Ok(id))) => Ok(Identity::from_string(&id.to_string())),
-                    _ => todo!(), // This can still happen but I'm lazy right now
-                }
-            })
-            .await
-            .map(|id| {
-                // self-assign the hash-id
-                self.hash_id = Some(id);
-                id
-            })
+        let s = _socket(self);
+
+        s.send_with_handle(Arc::clone(&s.inner), target, reg_msg, |reader| {
+            let r: ReplReader = reader.get_root().unwrap();
+            match r.which() {
+                Ok(ReplWhich::HashId(Ok(id))) => Ok(Identity::from_string(&id.to_string())),
+                _ => todo!(), // This can still happen but I'm lazy right now
+            }
+        })
+        .await
+        .map(|id| {
+            // self-assign the hash-id
+            self.hash_id = Some(id);
+            id
+        })
     }
 
     /// Get the `hash_id` field of this service, if it's set

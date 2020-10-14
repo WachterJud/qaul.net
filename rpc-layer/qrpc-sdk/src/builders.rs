@@ -64,6 +64,7 @@ pub mod _internal {
     use byteorder::{BigEndian, ByteOrder};
     use capnp::{message::Builder as Bld, serialize_packed};
     use socket2::Socket;
+    use tracing::trace;
 
     /// Take address and data and turn it into a basic rpc message
     pub fn to(addr: String, data: Vec<u8>) -> Vec<u8> {
@@ -76,10 +77,11 @@ pub mod _internal {
         serialize_packed::write_message(&mut buffer, &msg).unwrap();
 
         let len = buffer.len();
-        let mut message = vec![8];
+        let mut message = vec![0; 8];
         BigEndian::write_u64(&mut message, len as u64);
 
         message.append(&mut buffer);
+        trace!("Message length: {}", message.len());
         message
     }
 
@@ -92,16 +94,29 @@ pub mod _internal {
         let mut len = vec![0; 8];
         loop {
             let (l, _) = socket.peek_from(&mut len)?;
-            if l == 8 {
+            trace!("Peeked {} bytes...", l);
+            if l >= 8 {
+                trace!("Breaking read loop...");
                 break;
             }
         }
 
-        let (_, _) = socket.recv_from(&mut len)?;
+        let (bytes, _) = socket.recv_from(&mut len)?;
+        assert_eq!(bytes, 8);
+        trace!("Meep?");
+        
         let len = BigEndian::read_u64(&len);
-        let mut buffer = vec![0; len as usize];
-        socket.recv_from(&mut buffer)?;
+        trace!("Incoming message length: {}", len);
 
+        let mut foo = vec![0; 1];
+        let (l, _) = socket.peek_from(&mut foo)?;
+        trace!("There is {} bytes to read here...", l);
+
+        
+        let mut buffer = vec![0; (len - 8) as usize];
+        socket.recv_from(&mut buffer)?;
+        trace!("Florp");
+        
         let msg = MsgReader::new(buffer)?;
         let carrier: rpc_message::Reader = msg.get_root().unwrap();
         let addr = carrier.get_addr().unwrap();

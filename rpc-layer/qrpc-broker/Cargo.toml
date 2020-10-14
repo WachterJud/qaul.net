@@ -6,7 +6,7 @@ authors = ["Kaiden Fey <kookie@spacekookie.de>"]
 edition = "2018"
 
 [dependencies]
-identity = { path = "../../ratman/identity", version = "0.5", package = "ratman-identity" }
+identity = { path = "../../ratman/identity", version = "0.5", package = "ratman-identity", features = ["random"] }
 qrpc-sdk = { path = "../qrpc-sdk", version = "0.1", features = ["internals"] }
 
 async-std = "=1.5"

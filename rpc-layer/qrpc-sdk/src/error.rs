@@ -17,6 +17,23 @@ pub enum RpcError {
     AlreadyConnected,
     /// Failed to perform action that requires a connection
     NotConnected,
+    /// Invalid connection: performing the last operation has failed
+    ConnectionFault,
+    /// Encoding or decoding a payload failed
+    EncoderFault,
     /// Any other failure with it's error message string
     Other(String),
+}
+
+
+impl From<std::io::Error> for RpcError {
+    fn from(_: std::io::Error) -> Self {
+        Self::ConnectionFault
+    }
+}
+
+impl From<capnp::Error>    for RpcError {
+    fn from(_: capnp::Error) -> Self {
+        Self::EncoderFault
+    }
 }

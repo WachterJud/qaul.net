@@ -31,10 +31,20 @@ pub fn upgrade(_service: &Service, _hash_id: Identity) -> (String, Vec<u8>) {
 }
 
 /// Generate a simple response error message
-pub fn resp_err() -> Vec<u8> {
+pub fn resp_bool(b: bool) -> Vec<u8> {
     let mut msg = Bld::new_default();
     let mut reply = msg.init_root::<repl::Builder>();
-    reply.set_success(false);
+    reply.set_success(b);
+
+    let mut buffer = vec![];
+    serialize_packed::write_message(&mut buffer, &msg).unwrap();
+    buffer
+}
+
+pub fn resp_id(id: Identity) -> Vec<u8> {
+    let mut msg = Bld::new_default();
+    let mut reply = msg.init_root::<repl::Builder>();
+    reply.set_hash_id(&id.to_string());
 
     let mut buffer = vec![];
     serialize_packed::write_message(&mut buffer, &msg).unwrap();
@@ -50,7 +60,7 @@ pub fn parse_rpc_msg(buffer: Vec<u8>) -> Result<MsgReader<'static, cap::Reader<'
 /// basically no reason to call this function directly.
 #[cfg_attr(not(feature = "internals"), doc(hidden))]
 pub mod _internal {
-    use crate::{io::MsgReader, types::rpc_message};
+    use crate::{error::RpcResult, io::MsgReader, types::rpc_message};
     use byteorder::{BigEndian, ByteOrder};
     use capnp::{message::Builder as Bld, serialize_packed};
     use socket2::Socket;
@@ -78,25 +88,25 @@ pub mod _internal {
     /// Feel free to use this function in your service code.  The
     /// first field in the tuple is the destination address, the
     /// second is the data payload.
-    pub fn from(socket: &Socket) -> Option<(String, Vec<u8>)> {
+    pub fn from(socket: &Socket) -> RpcResult<(String, Vec<u8>)> {
         let mut len = vec![0; 8];
         loop {
-            let (l, _) = socket.peek_from(&mut len).unwrap();
+            let (l, _) = socket.peek_from(&mut len)?;
             if l == 8 {
                 break;
             }
         }
 
-        let (_, _) = socket.recv_from(&mut len).ok()?;
+        let (_, _) = socket.recv_from(&mut len)?;
         let len = BigEndian::read_u64(&len);
         let mut buffer = vec![0; len as usize];
-        socket.recv_from(&mut buffer).ok()?;
+        socket.recv_from(&mut buffer)?;
 
-        let msg = MsgReader::new(buffer).ok()?;
+        let msg = MsgReader::new(buffer)?;
         let carrier: rpc_message::Reader = msg.get_root().unwrap();
         let addr = carrier.get_addr().unwrap();
         let data = carrier.get_data().unwrap();
 
-        Some((addr.to_string(), data.to_vec()))
+        Ok((addr.to_string(), data.to_vec()))
     }
 }

@@ -2,7 +2,7 @@
 
 use crate::{
     builders,
-    errors::{RpcError, RpcResult},
+    error::{RpcError, RpcResult},
     io::MsgReader,
 };
 use async_std::{future, sync::Arc, task};
@@ -177,11 +177,15 @@ impl RpcSocket {
         let _self = Arc::clone(self);
         self.with_timeout(async move {
             match builders::_internal::from(&_self.inner) {
-                Some((_, buf)) => MsgReader::new(buf).map(|ok| handle(ok)),
-                None => Err(capnp::Error::failed("Failed to decode".into())),
+                // This match is essentially a ? but in a closure
+                Ok((_, buf)) => match MsgReader::new(buf).map(|ok| handle(ok)) {
+                    Ok(f) => f,
+                    Err(e) => Err(e.into()),
+                },
+                Err(e) => Err(e.into()),
             }
         })
-        .await?
+        .await
         .map_err(|_| RpcError::Other("Serialisation failure!".into()))?
     }
 
@@ -205,7 +209,7 @@ impl RpcSocket {
     /// Receive a message from this socket
     ///
     /// Returns None if the socket is no longer able to yield messages
-    pub fn recv(self: &Arc<Self>) -> Option<(String, Vec<u8>)> {
+    pub fn recv(self: &Arc<Self>) -> RpcResult<(String, Vec<u8>)> {
         builders::_internal::from(&self.inner)
     }
 

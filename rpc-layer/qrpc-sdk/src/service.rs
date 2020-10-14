@@ -1,4 +1,4 @@
-use crate::errors::RpcResult;
+use crate::error::RpcResult;
 use crate::{builders, RpcSocket};
 use identity::Identity;
 use std::sync::Arc;

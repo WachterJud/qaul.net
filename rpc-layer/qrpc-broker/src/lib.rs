@@ -1,55 +1,118 @@
 //! An extensible rpc message broker for the libqaul ecosystem.
 
-use async_std::sync::RwLock;
+use async_std::{sync::RwLock, task};
+use identity::Identity;
 use qrpc_sdk::{
     builders, default_socket_path,
+    error::RpcError,
     io::MsgReader,
     rpc::capabilities::{self, Which},
+    types::service,
     PosixAddr, PosixSocket, RpcSocket,
 };
 use std::{collections::BTreeMap, sync::Arc};
-use tracing::{error, info};
+use tracing::{debug, error, info};
 
 type CapReader = MsgReader<'static, capabilities::Reader<'static>>;
+
+pub struct ServiceEntry {
+    addr: Arc<PosixAddr>,
+    id: Identity,
+}
 
 /// Hold the main broker state
 pub struct Broker {
     sock: Arc<RpcSocket>,
-    connections: Arc<RwLock<BTreeMap<String, Arc<PosixSocket>>>>,
+    connections: Arc<RwLock<BTreeMap<String, ServiceEntry>>>,
 }
 
 impl Broker {
-    pub fn new() -> Self {
+    pub fn new() -> Arc<Self> {
         let sock = RpcSocket::create(default_socket_path()).unwrap();
-        sock.start_server(|socket, addr| {
-            Self::handle_connection(socket, addr);
+        let connections = Default::default();
+
+        let this = Arc::new(Self { sock, connections });
+
+        let _this = Arc::clone(&this);
+        this.sock.start_server(move |socket, addr| {
+            task::block_on(async { _this.handle_connection(socket, addr).await });
         });
 
-        let connections = Default::default();
-        Self { sock, connections }
+        this
     }
 
     /// Handle connections from a single incoming socket
-    fn handle_connection(sock: Arc<RpcSocket>, src_addr: PosixAddr) {
+    async fn handle_connection(self: &Arc<Self>, sock: Arc<RpcSocket>, src_addr: PosixAddr) {
         info!("Receiving connection to: {:?}", src_addr);
+        let src_addr = Arc::new(src_addr);
+
         loop {
             let (_dst_addr, buffer) = match sock.recv() {
-                Some(a) => a,
-                None => break,
+                Ok(a) => {
+                    debug!("Receiving incoming message...");
+                    a
+                }
+                Err(RpcError::ConnectionFault) => {
+                    debug!("Error: Connection dropped");
+                    break;
+                }
+                Err(_) => {
+                    debug!("Error: Invalid payload");
+                    continue;
+                }
             };
 
             let capr: CapReader = match MsgReader::new(buffer) {
                 Ok(r) => r,
                 Err(_) => {
-                    sock.send_raw(builders::resp_err(), None);
+                    sock.send_raw(builders::resp_bool(false), None);
                     continue;
                 }
             };
 
+            debug!("Parsing message");
+
             match capr.get_root().unwrap().which() {
-                Ok(Which::Register(Ok(reg))) => {}
-                Ok(Which::Unregister(Ok(unreg))) => {}
-                Ok(Which::Upgrade(Ok(upgr))) => {}
+                // Registering means needing to insert the service and report either ok or not
+                Ok(Which::Register(Ok(reg))) => {
+                    let sr: service::Reader = match reg.get_service() {
+                        Ok(r) => r,
+                        Err(_) => continue,
+                    };
+
+                    let name = match sr.get_name() {
+                        Ok(n) => n,
+                        Err(_) => {
+                            sock.send_raw(builders::resp_bool(false), Some(src_addr.as_ref()));
+                            continue;
+                        }
+                    };
+                    info!("Registering new service: {}", name);
+
+                    if let Some(id) = self
+                        .add_new_service(name.to_string(), Arc::clone(&src_addr))
+                        .await
+                    {
+                        sock.send_raw(builders::resp_id(id), Some(src_addr.as_ref()));
+                    } else {
+                        sock.send_raw(builders::resp_bool(false), Some(src_addr.as_ref()));
+                        continue;
+                    }
+                }
+                Ok(Which::Unregister(Ok(unreg))) => {
+                    let id = match unreg.get_hash_id() {
+                        Ok(n) => n,
+                        Err(_) => {
+                            sock.send_raw(builders::resp_bool(false), Some(src_addr.as_ref()));
+                            continue;
+                        }
+                    };
+
+                    let id = Identity::from_string(&id.to_string());
+                    self.remove_service_by_id(id).await;
+                    sock.send_raw(builders::resp_bool(true), Some(src_addr.as_ref()));
+                }
+                Ok(Which::Upgrade(Ok(_))) => todo!(),
                 _ => {
                     error!("Invalid capability set; dropping connection");
                     continue;
@@ -57,59 +120,42 @@ impl Broker {
             }
         }
     }
+
+    /// Insert a new service to the map, return None if it already exists
+    async fn add_new_service(
+        self: &Arc<Self>,
+        name: String,
+        addr: Arc<PosixAddr>,
+    ) -> Option<Identity> {
+        let mut conn = self.connections.write().await;
+        if conn.contains_key(&name) {
+            return None;
+        }
+
+        let id = Identity::random();
+        conn.insert(name, ServiceEntry { addr, id });
+        Some(id)
+    }
+
+    async fn get_service(self: &Arc<Self>, name: &String) -> Option<Arc<PosixAddr>> {
+        self.connections
+            .read()
+            .await
+            .get(name)
+            .map(|entry| Arc::clone(&entry.addr))
+    }
+
+    async fn remove_service_by_id(self: &Arc<Self>, id: Identity) -> Option<()> {
+        let mut conn = self.connections.write().await;
+        if let Some(ref name) = conn
+            .iter()
+            .find(|(_, entry)| entry.id == id)
+            .map(|(name, _)| name.clone())
+        {
+            conn.remove(name);
+            Some(())
+        } else {
+            None
+        }
+    }
 }
-
-// #[test]
-// fn make_it_just_work_please() {
-//     use capnp::{message::Builder, serialize_packed};
-//     use qrpc_sdk::types::rpc_broker::service;
-
-//     let mut msg = Builder::new_default();
-//     let mut service = msg.init_root::<service::Builder>();
-
-//     let d = "This is a test service to see how the RPC layer works";
-
-//     service.set_name("net.qaul.test-service");
-//     service.set_version(1);
-//     service.set_description(d.clone());
-
-//     let mut buffer = vec![];
-//     serialize_packed::write_message(&mut buffer, &msg).unwrap();
-
-//     //// Now test our de-serialisation logic
-//     let reader = UtilReader::new(buffer).unwrap();
-//     let parsed: service::Reader = reader.get_root().unwrap();
-
-//     assert_eq!(parsed.get_name().unwrap(), "net.qaul.test-service");
-//     assert_eq!(parsed.get_description().unwrap(), d);
-//     assert_eq!(parsed.get_version(), 1);
-// }
-
-/*
-Stuff I need
-
-service -> service
-service -> libqaul
-libqaul -> service (reply, push/ subscription)
-
-
-Each service has two parts: service core, and service client lib
-
-service client lib:
-
-- no logic
-- defines the API and types with capn proto
-
-service core:
-
-- all the logic
-- no types
-- connects to the broker to advertise it's capabilities
-
-Service advertisement
-
-- name
-- hash id
-- capabilities
-
-*/

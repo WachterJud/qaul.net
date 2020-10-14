@@ -1,5 +1,7 @@
 //! An extensible rpc message broker for the libqaul ecosystem.
 
+mod exit;
+
 use async_std::{sync::RwLock, task};
 use identity::Identity;
 use qrpc_sdk::{
@@ -37,6 +39,9 @@ impl Broker {
         this.sock.start_server(move |socket, addr| {
             task::block_on(async { _this.handle_connection(socket, addr).await });
         });
+
+        // Make sure we clean up the socket when we exti
+        exit::add_shutdown_hooks(Arc::clone(&this));
 
         this
     }

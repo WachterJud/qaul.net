@@ -9,14 +9,17 @@ use async_std::{future, sync::Arc, task};
 use capnp::traits::FromPointerReader;
 use socket2::{Domain, SockAddr, Type};
 use std::{
+    clone::Clone,
+    fs,
     future::Future,
     io::Result,
+    net::Shutdown,
     path::{Path, PathBuf},
     sync::atomic::{AtomicBool, Ordering},
     thread,
     time::Duration,
 };
-use tracing::error;
+use tracing::{debug, error, info, warn};
 
 /// A special socket address for a posix socket
 ///
@@ -82,10 +85,15 @@ impl RpcSocket {
     /// connections on it, this function wraps both `new` (sort of),
     /// and `listen`, meaning that you _must_ provide a closure at
     /// this point.
-    pub fn create(path: impl AsRef<Path>) -> Result<Arc<Self>> {
-        let (inner, _addr) = Self::new_socket(path)?;
-        inner.bind(&_addr)?;
+    pub fn create(path: impl AsRef<Path> + Clone) -> Result<Arc<Self>> {
+        let (inner, _addr) = Self::new_socket(path.clone())?;
+        if let Err(_) = inner.bind(&_addr) {
+            warn!("Existing socket found...killing it first!");
+            fs::remove_file(path)?;
+            inner.bind(&_addr)?;
+        }
         inner.listen(32)?;
+        debug!("Setting socket to LISTEN=32");
 
         let arc = Arc::new(Self {
             inner,
@@ -103,6 +111,7 @@ impl RpcSocket {
     where
         F: Fn(Arc<Self>, SockAddr) + Send + Sync + 'static,
     {
+        info!("Listening for incoming socket connetions...");
         // We spawn a dedicated thread because socket2 is a non-async
         // library and we don't want to accidentally deadlock our
         // whole executor on this code.  Besides, it's kinda the
@@ -234,5 +243,9 @@ impl RpcSocket {
         future::timeout(self.timeout.clone(), fut)
             .await
             .map_err(|_| RpcError::Timeout)
+    }
+
+    pub fn shutdown(&self) -> Option<()> {
+        self.inner.shutdown(Shutdown::Both).ok()
     }
 }

@@ -4,6 +4,7 @@ use crate::{
     helpers::{QueryResult, Subscription, Tagged},
     messages::{Message, Mode, MsgQuery, MsgRef},
     services::Service,
+    store::MsgUtils,
     Identity,
 };
 use alexandria::{

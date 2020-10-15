@@ -1,4 +1,4 @@
-use crate::{helpers::Tagged, Identity};
+use crate::{helpers::Tagged, store::FromRecord, Identity};
 use alexandria::{
     query::{Query, QueryResult, Subscription as Sub},
     record::RecordRef,
@@ -14,7 +14,7 @@ pub type SubId = Identity;
 /// A generic subscription which can stream data from libqaul
 pub struct Subscription<T>
 where
-    T: From<RecordRef> + Tagged,
+    T: FromRecord<T> + Tagged,
 {
     store: Arc<Library>,
     session: Session,
@@ -24,7 +24,7 @@ where
 
 impl<T> Subscription<T>
 where
-    T: From<RecordRef> + Tagged,
+    T: FromRecord<T> + Tagged,
 {
     pub(crate) fn new(store: &Arc<Library>, session: Session, inner: Sub) -> Self {
         Self {
@@ -47,7 +47,7 @@ where
             let rec = self.store.query(self.session, Query::path(path)).await;
 
             if let Ok(QueryResult::Single(rec)) = rec {
-                break rec.into();
+                break T::from_rec(rec);
             }
         }
     }

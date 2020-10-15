@@ -1,7 +1,7 @@
 //! Network message types and utilities
 
 // Public exports
-pub use crate::api::messages::{IdType, Message, Mode, MsgId, MsgQuery, MsgRef, SigTrust, ID_LEN};
+pub use libqaul_types::messages::{IdType, Message, Mode, MsgId, MsgQuery, MsgRef, SigTrust, ID_LEN};
 
 mod store;
 pub(crate) use self::store::{MsgStore, TAG_UNREAD};

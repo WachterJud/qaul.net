@@ -7,14 +7,21 @@
 //! reading a data type from a record.
 
 mod messages;
+pub(crate) use messages::MsgUtils;
+
 mod services;
 
 mod users;
 pub(crate) use users::KeyWrap;
 
 use crate::{messages::SigTrust, Identity};
-use alexandria::record::kv::Value;
+use alexandria::record::{kv::Value, RecordRef};
 use std::collections::{BTreeMap, BTreeSet};
+
+/// A utility trait to get around the orphan rules
+pub trait FromRecord<T> {
+    fn from_rec(rec: RecordRef) -> T;
+}
 
 struct Conv;
 

@@ -1,8 +1,11 @@
 //! Handling message interaction with Alexandria
 
-use super::Conv;
-use crate::{messages::Message, helpers::Tagged};
-use alexandria::{record::RecordRef, utils::{Diff, Tag}};
+use super::{FromRecord, Conv};
+use crate::{helpers::Tagged, messages::Message};
+use alexandria::{
+    record::RecordRef,
+    utils::{Diff, Tag},
+};
 
 const MID: &'static str = "id";
 const SENDER: &'static str = "sender";
@@ -10,8 +13,12 @@ const ASSOC: &'static str = "associate";
 const SIGN: &'static str = "sign";
 const PLOAD: &'static str = "payload";
 
-impl From<RecordRef> for Message {
-    fn from(rec: RecordRef) -> Self {
+pub(crate) trait MsgUtils {
+    fn diff(&self) -> Vec<Diff>;
+}
+
+impl FromRecord<Message> for Message {
+    fn from_rec(rec: RecordRef) -> Self {
         let kv = rec.kv();
 
         Self {
@@ -24,9 +31,8 @@ impl From<RecordRef> for Message {
     }
 }
 
-impl Message {
-    /// Generate a set of diffs to insert into alexandria
-    pub(crate) fn diff(&self) -> Vec<Diff> {
+impl MsgUtils for Message {
+    fn diff(&self) -> Vec<Diff> {
         vec![
             Diff::map().insert(MID, self.id.as_bytes().to_vec()),
             Diff::map().insert(SENDER, self.sender.as_bytes().to_vec()),

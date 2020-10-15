@@ -1,5 +1,5 @@
 //! Low-level binary payload messages for qaul.net
-//! 
+//!
 //! A set of utilities to dispatch and receive binary payload messages
 //! from a remote user on the network.  Higher-level message
 //! abstractions are available as external services.  Use this type if
@@ -156,10 +156,14 @@ impl IdType {
 #[derive(Clone, Default, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub struct MsgQuery {
-    pub(crate) id: Option<MsgId>,
-    pub(crate) sender: Option<Identity>,
-    pub(crate) tags: TagSet,
-    pub(crate) skip: usize,
+    #[doc(hidden)]
+    pub id: Option<MsgId>,
+    #[doc(hidden)]
+    pub sender: Option<Identity>,
+    #[doc(hidden)]
+    pub tags: TagSet,
+    #[doc(hidden)]
+    pub skip: usize,
 }
 
 impl MsgQuery {

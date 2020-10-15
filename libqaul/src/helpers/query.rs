@@ -1,13 +1,16 @@
 //! A utility module to query messages
 
-use crate::error::{Error, Result};
+use crate::{
+    error::{Error, Result},
+    store::FromRecord,
+};
 use alexandria::{query::QueryIterator, record::RecordRef};
 use std::marker::PhantomData;
 
 /// The resulting set of a query operation
 pub struct QueryResult<T>
 where
-    T: From<RecordRef>,
+    T: FromRecord<T>,
 {
     inner: QueryIterator,
     _type: PhantomData<T>,
@@ -15,7 +18,7 @@ where
 
 impl<T> QueryResult<T>
 where
-    T: From<RecordRef>,
+    T: FromRecord<T>,
 {
     pub(crate) fn new(inner: QueryIterator) -> Self {
         Self {
@@ -47,7 +50,7 @@ where
     /// Try to get a single element from the query iterator
     pub async fn next(&self) -> Result<T> {
         match self.inner.next().await {
-            Ok(Some(rec)) => Ok(rec.into()),
+            Ok(Some(rec)) => Ok(T::from_rec(rec)),
             _ => Err(Error::NoData),
         }
     }
@@ -88,7 +91,7 @@ where
         let mut vec = Vec::with_capacity(num);
         let mut ctr = 0;
         while let Ok(Some(rec)) = self.inner.next().await {
-            vec.push(rec.into());
+            vec.push(T::from_rec(rec));
 
             ctr += 1;
             if ctr > num && break {}
@@ -105,7 +108,7 @@ where
     pub async fn all(&self) -> Result<Vec<T>> {
         let mut vec = vec![];
         while let Ok(Some(rec)) = self.inner.next().await {
-            vec.push(rec.into());
+            vec.push(T::from_rec(rec));
         }
         Ok(vec)
     }

@@ -12,7 +12,7 @@ stdenv.mkDerivation {
     binutils # rustracer -- currently broken
     
     # Required for the docs
-    mdbook graphviz
+    mdbook graphviz rsync
 
     # Required for Android integration
     cmake

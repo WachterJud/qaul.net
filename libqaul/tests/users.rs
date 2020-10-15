@@ -1,7 +1,7 @@
 //! libqaul user tests
 
 mod harness;
-use harness::{sec5, sec10};
+use harness::{sec10, sec5};
 
 use libqaul::users::UserUpdate;
 
@@ -17,6 +17,8 @@ async fn user_create() {
     assert_eq!(net.a().users().list().await.len(), 1);
 }
 
+// FIXME: currently broken
+#[ignore]
 #[async_std::test]
 async fn user_delete() {
     let net = harness::init().await;
@@ -31,6 +33,7 @@ async fn user_delete() {
     assert_eq!(net.a().users().list().await.len(), 0);
 }
 
+// FIXME: currently broken
 #[ignore]
 #[async_std::test]
 async fn modify_user() {

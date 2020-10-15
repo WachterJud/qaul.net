@@ -128,6 +128,15 @@ pub enum Service {
     Name(String),
 }
 
+impl<T> From<T> for Service
+where
+    T: Into<String>,
+{
+    fn from(t: T) -> Self {
+        Self::Name(t.into())
+    }
+}
+
 /// Event type that can be sent to services to react to state changes
 pub enum ServiceEvent {
     Open(UserAuth),

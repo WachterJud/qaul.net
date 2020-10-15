@@ -62,14 +62,17 @@ async fn handle_packet(s: &mut TcpStream, conns: &ConnMap) -> RpcResult<()> {
     let Message { id, addr, data } = io::recv(s).await?;
     match addr.as_str() {
         "net.qaul._broker" => {
+            debug!("Message addressed to broker; handling!");
             let msg = protocol::broker_command(id, &s, data, &conns).await?;
             io::send(s, msg).await?;
             Ok(())
         }
         _ => {
+            debug!("Message addressed to bus component; looking up stream!");
             let mut t_stream = match conns.read().await.get(&addr).map(|s| s.io.clone()) {
                 Some(s) => s,
                 None => {
+                    warn!("Requested component does not exist no qrpc bus!");
                     io::send(
                         s,
                         Message {
@@ -79,7 +82,7 @@ async fn handle_packet(s: &mut TcpStream, conns: &ConnMap) -> RpcResult<()> {
                         },
                     )
                     .await?;
-                    return Err(RpcError::NoSuchService(addr.clone()));
+                    return Ok(());
                 }
             };
 

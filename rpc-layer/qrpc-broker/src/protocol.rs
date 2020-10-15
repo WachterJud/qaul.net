@@ -45,7 +45,7 @@ pub(crate) async fn broker_command(
         Ok(Which::Register(Ok(reg))) => {
             let name = parse_register(reg)?;
             let id = Identity::random();
-            trace!("Attempting to register new service: {} (ID: {})", name, id);
+            trace!("Registering a new service: {} (ID: {})", name, id);
 
             let entry = ServiceEntry {
                 addr: name.clone(),
@@ -53,7 +53,10 @@ pub(crate) async fn broker_command(
                 id,
             };
 
-            conns.insert(name.clone(), entry);
+            if let Some(_) = conns.insert(name.clone(), entry) {
+                warn!("A service with this name already existed.  This will be a hard-error in the future.");
+            }
+
             Ok(Message {
                 id: req_id,
                 addr: name,

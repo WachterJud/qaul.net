@@ -1,6 +1,6 @@
 //! I/O utility module
 
-use crate::{builders::_internal, error::RpcResult, types::rpc_message};
+use crate::{builders::_internal, error::RpcResult};
 use async_std::{net::TcpStream, prelude::*};
 use byteorder::{BigEndian, ByteOrder};
 use identity::Identity;

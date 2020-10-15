@@ -132,4 +132,4 @@ pub mod parser;
 
 pub use identity::Identity;
 pub use service::{Service, ServiceConnector};
-pub use socket::RpcSocket;
+pub use socket::{default_socket_path, RpcSocket};

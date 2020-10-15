@@ -1,4 +1,4 @@
-use crate::{builders, error::RpcResult};
+use crate::{builders, error::RpcResult, parser, RpcSocket};
 use identity::Identity;
 use std::sync::Arc;
 
@@ -12,7 +12,7 @@ pub struct Service {
     pub version: u16,
     pub description: String,
     hash_id: Option<Identity>,
-    // socket: Option<Arc<RpcSocket>>,
+    socket: Option<Arc<RpcSocket>>,
 }
 
 impl Service {
@@ -26,35 +26,20 @@ impl Service {
             version,
             description: description.into(),
             hash_id: None,
+            socket: None,
         }
     }
 
     /// Register this service with the RPC broker/ libqaul
-    pub async fn register(&mut self, socket: ()) -> RpcResult<Identity> {
-        // self.socket = Some(socket);
-        // let (target, reg_msg) = builders::register(&self);
-
-        // // Send a message to the backend and handle the reply, which
-        // // needs to contain a hash_id which we parse and then return
-        // // from this function as an Identity.
-        // use crate::rpc::sdk_reply::{Reader as ReplReader, Which as ReplWhich};
-        // let s = _socket(self);
-
-        // s.send_with_handle(Arc::clone(&s.inner), target, reg_msg, |reader| {
-        //     let r: ReplReader = reader.get_root().unwrap();
-        //     match r.which() {
-        //         Ok(ReplWhich::HashId(Ok(id))) => Ok(Identity::from_string(&id.to_string())),
-        //         _ => todo!(), // This can still happen but I'm lazy right now
-        //     }
-        // })
-        // .await
-        // .map(|id| {
-        //     // self-assign the hash-id
-        //     self.hash_id = Some(id);
-        //     id
-        // })
-
-        todo!()
+    pub async fn register(&mut self, socket: Arc<RpcSocket>) -> RpcResult<Identity> {
+        self.socket = Some(socket);
+        let msg = builders::register(&self)?;
+        Ok(self
+            .socket
+            .as_ref()
+            .unwrap()
+            .send(msg, |msg| parser::resp_id(msg))
+            .await?)
     }
 
     /// Get the `hash_id` field of this service, if it's set

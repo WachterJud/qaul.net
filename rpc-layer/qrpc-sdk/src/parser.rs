@@ -12,6 +12,11 @@
 //! some more convenient builders as well (although the builder APIs
 //! in the original crate are quite good).
 
+use crate::{
+    error::{RpcError, RpcResult},
+    io::Message,
+    Identity,
+};
 use capnp::{
     message::{Reader, ReaderOptions},
     serialize::OwnedSegments,
@@ -97,5 +102,22 @@ impl<'s, T: FromPointerReader<'s>> MsgReader<'s, T> {
     /// [qrpc-broker]: https://docs.qaul.net/api/qrpc_broker/index.html
     pub fn get_root(&'s self) -> Result<T> {
         self.r.get_root()
+    }
+}
+
+/// Parse a message into a new ID (maybe)
+pub fn resp_id(msg: Message) -> RpcResult<Identity> {
+    use crate::rpc::sdk_reply::{HashId, Reader};
+
+    let Message {
+        id: _,
+        addr: _,
+        data,
+    } = msg;
+    let r = MsgReader::new(data)?;
+    let reader: Reader = r.get_root()?;
+    match reader.which() {
+        Ok(HashId(Ok(id))) => Ok(Identity::from_string(&id.to_string())),
+        _ => Err(RpcError::EncoderFault("".into())),
     }
 }

@@ -8,6 +8,7 @@
 //! is included for debugging purposes.
 
 use crate::{
+    io::Message,
     parser::{MsgReader, Result},
     rpc::{capabilities as cap, sdk_reply as repl},
     Service,
@@ -15,22 +16,25 @@ use crate::{
 use capnp::{message::Builder as Bld, serialize_packed};
 use identity::Identity;
 
-/// Generate an registry message for this service
-pub fn register(_service: &Service) -> (String, Vec<u8>) {
-    ("net.qaul.rpc-broker".into(), vec![])
+/// Generate an enveloped registry message for this service
+pub fn register(_service: &Service) -> Result<Message> {
+    let mut msg = Bld::new_default();
+
+    let cap = msg.init_root::<cap::Builder>();
+    let reg = cap.init_register();
+    let mut serv = reg.init_service();
+
+    serv.set_name(&_service.name);
+    serv.set_description(&_service.description);
+    serv.set_version(_service.version as i16);
+
+    let mut buffer = vec![];
+    serialize_packed::write_message(&mut buffer, &msg)?;
+
+    Ok(_internal::make_carrier("net.qaul._broker".into(), buffer))
 }
 
-/// Generate an unregistry message for this service
-pub fn unregister(_hash_id: Identity) -> (String, Vec<u8>) {
-    ("net.qaul.rpc-broker".into(), vec![])
-}
-
-/// Generate an upgrade message for this service
-pub fn upgrade(_service: &Service, _hash_id: Identity) -> (String, Vec<u8>) {
-    ("net.qaul.rpc-broker".into(), vec![])
-}
-
-/// Generate a simple response error message
+/// Generate a simple boolean return payload
 pub fn resp_bool(b: bool) -> Vec<u8> {
     let mut msg = Bld::new_default();
     let mut reply = msg.init_root::<repl::Builder>();
@@ -41,6 +45,7 @@ pub fn resp_bool(b: bool) -> Vec<u8> {
     buffer
 }
 
+/// Generate a simple ID return payload
 pub fn resp_id(id: Identity) -> Vec<u8> {
     let mut msg = Bld::new_default();
     let mut reply = msg.init_root::<repl::Builder>();
@@ -60,10 +65,15 @@ pub fn parse_rpc_msg(buffer: Vec<u8>) -> Result<MsgReader<'static, cap::Reader<'
 /// basically no reason to call this function directly.
 #[cfg_attr(not(feature = "internals"), doc(hidden))]
 pub mod _internal {
-    use crate::{error::RpcResult, parser::MsgReader, types::rpc_message, Identity};
+    use crate::{error::RpcResult, io::Message, parser::MsgReader, types::rpc_message, Identity};
     use byteorder::{BigEndian, ByteOrder};
     use capnp::{message::Builder as Bld, serialize_packed};
-    use tracing::trace;
+
+    /// Create a carrier frame with address and a unique ID
+    pub fn make_carrier(addr: String, data: Vec<u8>) -> Message {
+        let id = Identity::random();
+        Message { id, addr, data }
+    }
 
     /// Take address and data and turn it into a basic rpc message
     pub fn to(id: Identity, addr: String, data: Vec<u8>) -> Vec<u8> {
@@ -96,6 +106,10 @@ pub mod _internal {
         let addr = carrier.get_addr()?;
         let data = carrier.get_data()?;
 
-        Ok((Identity::from_string(&id.to_string()), addr.to_string(), data.to_vec()))
+        Ok((
+            Identity::from_string(&id.to_string()),
+            addr.to_string(),
+            data.to_vec(),
+        ))
     }
 }

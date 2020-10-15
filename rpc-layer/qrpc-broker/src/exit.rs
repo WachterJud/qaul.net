@@ -25,12 +25,12 @@ extern "C" fn c_wrapper() {
 
 fn shutdown() {
     info!("Shutting down server-socket!");
-    let s = Arc::clone(&get_arc().sock.inner);
+    // let s = Arc::clone(&get_arc().sock.inner);
     
-    match get_arc().sock.shutdown(s.as_ref()) {
-        Some(()) => info!("Success!"),
-        None => error!("Failed to close server socket!"),
-    }
+    // match get_arc().sock.shutdown(s.as_ref()) {
+    //     Some(()) => info!("Success!"),
+    //     None => error!("Failed to close server socket!"),
+    // }
 }
 
 /// Add a shudown hook to this program

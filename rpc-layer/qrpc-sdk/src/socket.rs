@@ -25,6 +25,11 @@ use std::{
 
 type Lock<T> = Arc<Mutex<T>>;
 
+/// Return the default bind location for the qrpc broker socket
+pub fn default_socket_path() -> (&'static str, u16) {
+    ("localhost", 10222)
+}
+
 /// Bi-directional socket connection to a qrpc bus system
 ///
 /// A connection is always between a component on the bus, and the
@@ -95,11 +100,11 @@ impl RpcSocket {
     /// not be used in your service code.  To listen for incoming
     /// connections on the outgoing stream (meaning client side), use
     /// `listen(...)`
-    pub async fn server<F: Fn(TcpStream) + Send + Copy + 'static>(
-        addr: &str,
-        port: u16,
-        cb: F,
-    ) -> RpcResult<Arc<Self>> {
+    pub async fn server<F, D>(addr: &str, port: u16, cb: F, data: D) -> RpcResult<Arc<Self>>
+    where
+        F: Fn(TcpStream, D) + Send + Copy + 'static,
+        D: Send + Sync + Clone + 'static,
+    {
         let listen = Arc::new(TcpListener::bind(format!("{}:{}", addr, port)).await?);
         let _self = Arc::new(Self {
             stream: None,
@@ -119,7 +124,8 @@ impl RpcSocket {
                     break;
                 }
 
-                task::spawn(async move { cb(stream) });
+                let d = data.clone();
+                task::spawn(async move { cb(stream, d) });
             }
 
             info!("Terminating rpc accept loop...");

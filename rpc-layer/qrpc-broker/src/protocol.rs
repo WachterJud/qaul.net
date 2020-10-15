@@ -5,99 +5,63 @@
 //! address `net.qaul._broker`, while all other addresses need to be
 //! looked up in the component table.
 
-use crate::Broker;
-use async_std::task;
+use crate::{ConnMap, ServiceEntry};
+use async_std::net::TcpStream;
 use identity::Identity;
+
 use qrpc_sdk::{
     builders,
-    io::MsgReader,
+    error::{RpcError, RpcResult},
+    io::Message,
+    parser::MsgReader,
     rpc::{
         capabilities::{self, Which},
-        register, unregister,
+        register,
     },
-    types::{rpc_message, service},
-    PosixAddr, PosixSocket, RpcSocket,
+    types::service,
 };
-use std::sync::Arc;
-use tracing::{debug, error, info};
 
 type CapReader = MsgReader<'static, capabilities::Reader<'static>>;
-type RpcReader = MsgReader<'static, rpc_message::Reader<'static>>;
-
-pub(crate) enum Message {
-    Command(Vec<u8>),
-    Relay { addr: String, data: Vec<u8> },
-}
-
-/// Parse a carrier message into a typed command for the broker
-///
-/// Either it has been addressed to the broker, meaning that it needs
-/// to handle the incoming message, or it will simply relay it to a
-/// known service
-pub(crate) fn parse_carrier(buf: Vec<u8>) -> Option<Message> {
-    let reader: RpcReader = MsgReader::new(buf).ok()?;
-    let cardr = reader.get_root().ok()?;
-
-    let addr = cardr.get_addr().ok()?.to_string();
-    let data = cardr.get_data().ok()?.to_vec();
-
-    Some(match addr.as_str() {
-        "net.qaul._broker" => Message::Command(data),
-        _ => Message::Relay { addr, data },
-    })
-}
 
 /// Get new service name from a registry message
 #[inline]
-fn parse_register(r: register::Reader) -> Option<String> {
-    let sr: service::Reader = r.get_service().ok()?;
-    sr.get_name().map(|s| s.to_string()).ok()
-}
-
-/// Get hash_id from an unregistry message
-#[inline]
-fn parse_unregister(u: unregister::Reader) -> Option<Identity> {
-    u.get_hash_id()
-        .map(|id| Identity::from_string(&id.to_string()))
-        .ok()
+fn parse_register(r: register::Reader) -> RpcResult<String> {
+    let sr: service::Reader = r.get_service()?;
+    Ok(sr.get_name().map(|s| s.to_string())?)
 }
 
 /// Handle a commande meant for the message broker
 #[inline]
-pub(crate) fn handle_broker_cmd(
-    broker: Arc<Broker>,
-    rpc: Arc<RpcSocket>,
-    src_addr: Arc<PosixAddr>,
-    sock: &PosixSocket,
+pub(crate) async fn broker_command(
+    req_id: Identity,
+    stream: &TcpStream,
     buf: Vec<u8>,
-) -> Option<()> {
-    let capr: CapReader = MsgReader::new(buf).ok()?;
+    conns: &ConnMap,
+) -> RpcResult<Message> {
+    let capr: CapReader = MsgReader::new(buf)?;
 
-    match capr.get_root().ok()?.which() {
+    let mut conns = conns.write().await;
+    match capr.get_root()?.which() {
         Ok(Which::Register(Ok(reg))) => {
             let name = parse_register(reg)?;
-            info!("Registering new service: `{}`", name);
+            let id = Identity::random();
 
-            task::block_on(async {
-                if let Some(id) = broker.add_new_service(name, Arc::clone(&src_addr)).await {
-                    rpc.send_raw(sock, builders::resp_id(id), Some(src_addr.as_ref()));
-                    Some(())
-                } else {
-                    debug!("Error: failed to register service!");
-                    None
-                }
+            let entry = ServiceEntry {
+                addr: name.clone(),
+                io: stream.clone(),
+                id,
+            };
+
+            conns.insert(name.clone(), entry);
+            Ok(Message {
+                id: req_id,
+                addr: name,
+                data: builders::resp_id(id),
             })
         }
-        Ok(Which::Unregister(Ok(unreg))) => {
-            let id = parse_unregister(unreg)?;
-            task::block_on(async { broker.remove_service_by_id(id).await });
-            rpc.send_raw(sock, builders::resp_bool(true), Some(src_addr.as_ref()));
-            Some(())
-        }
-        Ok(Which::Upgrade(Ok(_))) => todo!(),
-        _ => {
-            error!("Invalid capability set; dropping connection");
-            None
-        }
+        Ok(_) => todo!(),
+        _ => Err(RpcError::EncoderFault(
+            "failed to parse capability message!".into(),
+        )),
     }
 }

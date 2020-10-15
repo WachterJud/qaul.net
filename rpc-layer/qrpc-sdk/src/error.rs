@@ -8,7 +8,7 @@ pub type RpcResult<T> = Result<T, RpcError>;
 #[derive(Debug)]
 pub enum RpcError {
     /// No such service was found by the broker
-    NoSuchService,
+    NoSuchService(String),
     /// The selected recipient didn't reply within the timeout
     ///
     /// This may indicate that the requested service has crashed, is
@@ -33,7 +33,7 @@ impl Display for RpcError {
             f,
             "{}",
             match self {
-                Self::NoSuchService => "The requested service does not exist!".into(),
+                Self::NoSuchService(s) => format!("The requested service {} does not exist!", s),
                 Self::Timeout => "The requested operation took too long (timeout)!".into(),
                 Self::AlreadyConnected =>
                     "Tried connecting to an already connected component!".into(),

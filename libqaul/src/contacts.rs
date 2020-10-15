@@ -6,7 +6,7 @@
 //! - local-only information about those users, like personal nicknames
 
 // Public exports
-pub use crate::api::contacts::{ContactEntry, ContactQuery};
+pub use libqaul_types::contacts::{ContactEntry, ContactQuery};
 
 use crate::{
     error::{Error, Result},

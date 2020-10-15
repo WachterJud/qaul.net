@@ -1170,9 +1170,11 @@ dependencies = [
  "futures",
  "hex",
  "jni",
+ "libqaul-types",
  "log 0.4.11",
  "mime",
  "netmod-mem",
+ "qrpc-sdk",
  "rand 0.7.3",
  "ratman",
  "ratman-harness",
@@ -1185,8 +1187,21 @@ dependencies = [
 ]
 
 [[package]]
-name = "libqaul-rpc"
+name = "libqaul-rpc2"
 version = "0.1.0"
+dependencies = [
+ "libqaul",
+ "qrpc-sdk",
+]
+
+[[package]]
+name = "libqaul-types"
+version = "0.1.0"
+dependencies = [
+ "alexandria-tags",
+ "ratman-identity",
+ "serde",
+]
 
 [[package]]
 name = "libsodium-sys"

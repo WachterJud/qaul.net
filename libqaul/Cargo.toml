@@ -8,7 +8,9 @@ edition = "2018"
 
 [dependencies]
 alexandria = { version = "0.2", path = "../utils/alexandria" }
+libqaul-types = { path = "types" }
 netmod-mem = { path = "../netmods/netmod-mem", optional = true }
+qrpc-sdk = { path = "../rpc-layer/qrpc-sdk", optional = true }
 ratman = { path = "../ratman" }
 
 async-std = { version = "=1.5", features = ["attributes", "unstable"] }
@@ -39,4 +41,4 @@ default = ["generate-message", "testing"]
 generate-message = []
 testing = ["tempfile", "netmod-mem"]
 ffi-java = ["jni"]
-
+rpc = ["qrpc-sdk"]

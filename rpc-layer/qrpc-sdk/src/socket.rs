@@ -105,6 +105,7 @@ impl RpcSocket {
         F: Fn(TcpStream, D) + Send + Copy + 'static,
         D: Send + Sync + Clone + 'static,
     {
+        info!("Opening qrpc socket on {}:{}", addr, port);
         let listen = Arc::new(TcpListener::bind(format!("{}:{}", addr, port)).await?);
         let _self = Arc::new(Self {
             stream: None,
@@ -124,6 +125,7 @@ impl RpcSocket {
                     break;
                 }
 
+                debug!("New incoming qrpc connection! ({:?})", stream.peer_addr());
                 let d = data.clone();
                 task::spawn(async move { cb(stream, d) });
             }
@@ -153,6 +155,7 @@ impl RpcSocket {
                 let msg = match io::recv(&mut sock).await {
                     Ok(msg) => msg,
                     Err(e) => {
+                        task::sleep(std::time::Duration::from_millis(10)).await;
                         error!("Failed reading message: {}", e.to_string());
                         continue;
                     }

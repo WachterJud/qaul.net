@@ -27,7 +27,7 @@ use qrpc_sdk::RpcSocket;
 async fn main() {
     log::parse_log_level();
 
-    let b = Broker::new();
+    let b = Broker::new().await;
 
     // let app = cfg::cli();
     // let cfg = cfg::match_fold(app);
@@ -43,6 +43,6 @@ async fn main() {
     // let _ = future::timeout(Duration::from_secs(10), async {
     // })
     // .await;
-    
+
     let _: () = future::poll_fn(|_| Poll::Pending).await;
 }

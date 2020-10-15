@@ -19,6 +19,7 @@ pub async fn recv(s: &mut TcpStream) -> RpcResult<Message> {
     let len = BigEndian::read_u64(&len_buf);
 
     let mut data = vec![0; len as usize];
+    trace!("Reading {} bytes for a message", len);
     s.read_exact(&mut data).await?;
 
     // Parse the carrier message type
@@ -29,8 +30,7 @@ pub async fn recv(s: &mut TcpStream) -> RpcResult<Message> {
 /// Send a message with frame
 pub async fn send(s: &mut TcpStream, msg: Message) -> RpcResult<()> {
     // Serialise into carrier message type
-    let Message { id, addr, data } = msg;
-    let mut msg_buf = _internal::to(id, addr, data);
+    let mut msg_buf = _internal::to(msg);
 
     let mut buffer = vec![0; 8];
     BigEndian::write_u64(&mut buffer, msg_buf.len() as u64);

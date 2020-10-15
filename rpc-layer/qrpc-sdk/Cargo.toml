@@ -12,7 +12,7 @@ repository = "https://git.open-communication.net/qaul/qaul.net"
 internals = []
 
 [dependencies]
-identity = { path = "../../ratman/identity", version = "0.5.0", package = "ratman-identity" }
+identity = { path = "../../ratman/identity", version = "0.5.0", package = "ratman-identity", features = ["random"] }
 
 async-std = { version = "=1.5", features = ["unstable"] }
 async-trait = "0.1"

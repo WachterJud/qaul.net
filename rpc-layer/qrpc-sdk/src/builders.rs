@@ -76,7 +76,9 @@ pub mod _internal {
     }
 
     /// Take address and data and turn it into a basic rpc message
-    pub fn to(id: Identity, addr: String, data: Vec<u8>) -> Vec<u8> {
+    pub fn to(cmsg: Message) -> Vec<u8> {
+        let Message { id, addr, data } = cmsg;
+
         let mut msg = Bld::new_default();
         let mut carrier = msg.init_root::<rpc_message::Builder>();
         carrier.set_id(&id.to_string());
@@ -85,13 +87,7 @@ pub mod _internal {
 
         let mut buffer = vec![];
         serialize_packed::write_message(&mut buffer, &msg).unwrap();
-
-        let len = buffer.len();
-        let mut message = vec![0; 8];
-        BigEndian::write_u64(&mut message, len as u64);
-
-        message.append(&mut buffer);
-        message
+        buffer
     }
 
     /// Read an rpc message from the socket

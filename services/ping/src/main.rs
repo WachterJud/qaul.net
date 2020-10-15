@@ -7,7 +7,7 @@
 //! you, or could be commented better, please send us a patch (or MR).
 
 use qrpc_sdk::{default_socket_path, RpcSocket, Service};
-use tracing::info;
+use tracing::{error, info};
 use tracing_subscriber::{filter::LevelFilter, fmt, EnvFilter};
 
 struct Ping {
@@ -35,11 +35,20 @@ async fn main() {
         1,
         "A simple service that says hello to everybody on the network.",
     );
-    let sock = RpcSocket::connect(default_socket_path()).unwrap();
-    serv.register(sock).await.unwrap();
 
-    //     let sock2 = RpcSocket::new(default_socket_path()).unwrap();
+    let (addr, port) = default_socket_path();
+    let id = serv
+        .register(match RpcSocket::connect(addr, port).await {
+            Ok(s) => s,
+            Err(e) => {
+                error!("Failed to connect to RPC backend: {}", e);
+                std::process::exit(1);
+            }
+        })
+        .await
+        .unwrap();
 
-    //     let sock3 = RpcSocket::new(default_socket_path()).unwrap();
-    // //     serv.register(sock).await.unwrap();
+    info!("Received service ID '{}' from qrpc-broker", id);
+
+    async_std::task::sleep(std::time::Duration::from_secs(60)).await;
 }

@@ -45,6 +45,7 @@ pub(crate) async fn broker_command(
         Ok(Which::Register(Ok(reg))) => {
             let name = parse_register(reg)?;
             let id = Identity::random();
+            trace!("Attempting to register new service: {} (ID: {})", name, id);
 
             let entry = ServiceEntry {
                 addr: name.clone(),

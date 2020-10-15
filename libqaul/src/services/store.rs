@@ -1,4 +1,9 @@
-use crate::{error::Result, Identity};
+use crate::{
+    error::Result,
+    services::MetadataMap,
+    store::{FromRecord, MetadataExt},
+    Identity,
+};
 use alexandria::{
     query::{Query, QueryResult},
     utils::{Path, Tag, TagSet},
@@ -10,99 +15,6 @@ use std::{
     ops::{Deref, DerefMut},
 };
 use tracing::warn;
-
-/// An arbitrary map of metadata that can be stored by a service
-///
-/// Data is stored per service/per user and is tagged with search
-/// tags.  This structure (and API) can be used to store service
-/// related data on a device that will be encrypted and can be loaded
-/// on reboot, meaning that your service doesn't have to worry about
-/// storing things securely on different platforms.
-///
-/// `MetadataMap` has a builder API that makes constructing initial
-/// maps easier than just providing an already initialised BTreeMap.
-#[derive(Debug, Default, Clone, Eq, PartialEq)]
-pub struct MetadataMap {
-    name: String,
-    map: BTreeMap<String, Vec<u8>>,
-}
-
-impl MetadataMap {
-    /// Creates a new, empty metadata map
-    pub fn new<S: Into<String>>(name: S) -> Self {
-        Self {
-            name: name.into(),
-            map: Default::default(),
-        }
-    }
-
-    /// Create a metadata map from a name and initialised map construct
-    ///
-    /// ```
-    /// # use libqaul::services::MetadataMap;
-    /// MetadataMap::from("numbers", vec![("fav", vec![1, 2, 3, 4])]);
-    /// ```
-    ///
-    /// Because from takes `IntoIterator`, you can also initialise
-    /// your map in-place:
-    ///
-    /// ```
-    /// # use libqaul::services::MetadataMap;
-    /// MetadataMap::from("numbers", vec![
-    ///     ("fav", vec![1, 2, 3, 4]),
-    ///     ("prime", vec![1, 3, 5, 7, 11]),
-    ///     ("acab", vec![13, 12]),
-    /// ]);
-    /// ```
-    pub fn from<S, K, M, V>(name: S, map: M) -> Self
-    where
-        S: Into<String>,
-        K: Into<String>,
-        M: IntoIterator<Item = (K, V)>,
-        V: IntoIterator<Item = u8>,
-    {
-        let name = name.into();
-        let map = map
-            .into_iter()
-            .map(|(k, v)| (k.into(), v.into_iter().collect()))
-            .collect();
-        Self { name, map }
-    }
-
-    /// Return this entries name
-    pub fn name(&self) -> &String {
-        &self.name
-    }
-
-    /// Add (and override) a key-value map and return the modified map
-    pub fn add<K, V>(mut self, k: K, v: V) -> Self
-    where
-        K: Into<String>,
-        V: Into<Vec<u8>>,
-    {
-        self.map.insert(k.into(), v.into());
-        self
-    }
-
-    /// Delete a key and return the modified map
-    pub fn delete<K: Into<String>>(mut self, k: K) -> Self {
-        self.map.remove(&k.into());
-        self
-    }
-}
-
-impl Deref for MetadataMap {
-    type Target = BTreeMap<String, Vec<u8>>;
-    fn deref(&self) -> &Self::Target {
-        &self.map
-    }
-}
-
-impl DerefMut for MetadataMap {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.map
-    }
-}
 
 /// Generate the service metedata entry path
 fn gen_path(serv: &String, name: &String) -> Path {
@@ -142,7 +54,7 @@ impl MetadataStore {
             .query(sess, Query::path(gen_path(&serv, &k)))
             .await
         {
-            Ok(QueryResult::Single(rec)) => data.gen_diffset(&rec.into()),
+            Ok(QueryResult::Single(rec)) => data.gen_diffset(&MetadataMap::from_rec(rec)),
             Err(_) => data.init_diff(),
             _ => unreachable!(),
         };
@@ -191,8 +103,11 @@ impl MetadataStore {
         tags.insert(Tag::empty(TAG_METADATA));
 
         match self.inner.query(sess, Query::tags().subset(tags)).await {
-            Ok(QueryResult::Single(rec)) => vec![rec.into()],
-            Ok(QueryResult::Many(vec)) => vec.into_iter().map(|rec| rec.into()).collect(),
+            Ok(QueryResult::Single(rec)) => vec![MetadataMap::from_rec(rec)],
+            Ok(QueryResult::Many(vec)) => vec
+                .into_iter()
+                .map(|rec| MetadataMap::from_rec(rec))
+                .collect(),
             Err(_) => vec![],
         }
     }

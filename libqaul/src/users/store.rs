@@ -4,7 +4,7 @@ use crate::{
     error::{Error, Result},
     qaul::Identity,
     security::{KeyId, Keypair},
-    store::KeyWrap,
+    store::{FromRecord, KeyWrap, UserProfileExt},
     users::{UserProfile, UserUpdate},
 };
 use alexandria::{
@@ -99,7 +99,7 @@ impl UserStore {
             .query(Session::Id(id), Query::Path(key_path(id)))
             .await
         {
-            Ok(QueryResult::Single(rec)) => KeyWrap::from(&*rec).0,
+            Ok(QueryResult::Single(rec)) => KeyWrap::from_rec(rec).0,
             _ => panic!("Local encryption key not known!"),
         }
     }
@@ -111,7 +111,7 @@ impl UserStore {
             .query(GLOBAL, Query::Path(profile_path(id)))
             .await
         {
-            Ok(QueryResult::Single(rec)) => Ok(UserProfile::from(&*rec)),
+            Ok(QueryResult::Single(rec)) => Ok(UserProfile::from_rec(rec)),
             Err(_) => Err(Error::NoUser),
             _ => unimplemented!(),
         }
@@ -128,10 +128,7 @@ impl UserStore {
             .await
             .unwrap()
         {
-            QueryResult::Many(vec) => vec
-                .into_iter()
-                .map(|rec| UserProfile::from(&*rec))
-                .collect(),
+            QueryResult::Many(vec) => vec.into_iter().map(|rec| UserProfile::from_rec(rec)).collect(),
             _ => unreachable!(),
         }
     }
@@ -149,10 +146,7 @@ impl UserStore {
             .await
             .unwrap()
         {
-            QueryResult::Many(vec) => vec
-                .into_iter()
-                .map(|rec| UserProfile::from(&*rec))
-                .collect(),
+            QueryResult::Many(vec) => vec.into_iter().map(|rec| UserProfile::from_rec(rec)).collect(),
             _ => unreachable!(),
         }
     }

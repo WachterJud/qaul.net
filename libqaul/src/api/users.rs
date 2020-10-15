@@ -1,26 +1,10 @@
 use crate::{
     error::{ratman, Result},
-    users::{UserProfile, UserUpdate},
+    users::{Token, UserAuth, UserProfile, UserUpdate},
     Identity, Qaul,
 };
-use serde::{de::Deserializer, ser::Serializer, Deserialize, Serialize};
+use serde::{Deserialize, Serialize};
 
-/// A random authentication token
-pub type Token = String;
-
-/// Wrapper to encode `User` authentication state
-///
-/// This structure can be aquired by challenging an authentication
-/// endpoint, such as `User::login` to yield a token. If a session for
-/// this `Identity` already exists, it will be re-used.
-#[derive(Clone, Debug, Hash, PartialEq, Eq, PartialOrd, Ord)]
-pub struct UserAuth(pub Identity, pub Token);
-
-impl UserAuth {
-    pub fn test() -> Self {
-        Self(Identity::random(), "<fake-token>".into())
-    }
-}
 
 /// Local user data and session management
 ///
@@ -154,46 +138,5 @@ impl<'qaul> Users<'qaul> {
     pub fn ok(&self, user: UserAuth) -> Result<()> {
         self.q.auth.trusted(user)?;
         Ok(())
-    }
-}
-
-/// A mirror of `UserAuth` used to implement the `Serialize` trait on
-/// `UserAuth`
-#[derive(Serialize)]
-struct UserAuthSer<'a> {
-    id: &'a Identity,
-    token: &'a Token,
-}
-
-impl serde::ser::Serialize for UserAuth {
-    fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        serde::ser::Serialize::serialize(
-            &UserAuthSer {
-                id: &self.0,
-                token: &self.1,
-            },
-            serializer,
-        )
-    }
-}
-
-/// A mirror of `UserAuth` used to implement the `Deserialize` trait on
-/// `UserAuth`
-#[derive(Deserialize)]
-struct UserAuthDe {
-    id: Identity,
-    token: Token,
-}
-
-impl<'de> serde::de::Deserialize<'de> for UserAuth {
-    fn deserialize<D>(deserializer: D) -> std::result::Result<Self, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        let ua: UserAuthDe = serde::de::Deserialize::deserialize(deserializer)?;
-        Ok(UserAuth(ua.id, ua.token))
     }
 }

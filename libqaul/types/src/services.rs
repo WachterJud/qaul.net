@@ -16,6 +16,7 @@
 use crate::users::UserAuth;
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
+use std::ops::{Deref, DerefMut};
 
 /// An arbitrary map of metadata that can be stored by a service
 ///
@@ -31,6 +32,83 @@ use std::collections::BTreeMap;
 pub struct MetadataMap {
     name: String,
     map: BTreeMap<String, Vec<u8>>,
+}
+
+impl MetadataMap {
+    /// Creates a new, empty metadata map
+    pub fn new<S: Into<String>>(name: S) -> Self {
+        Self {
+            name: name.into(),
+            map: Default::default(),
+        }
+    }
+
+    /// Create a metadata map from a name and initialised map construct
+    ///
+    /// ```
+    /// # use libqaul::services::MetadataMap;
+    /// MetadataMap::from("numbers", vec![("fav", vec![1, 2, 3, 4])]);
+    /// ```
+    ///
+    /// Because from takes `IntoIterator`, you can also initialise
+    /// your map in-place:
+    ///
+    /// ```
+    /// # use libqaul::services::MetadataMap;
+    /// MetadataMap::from("numbers", vec![
+    ///     ("fav", vec![1, 2, 3, 4]),
+    ///     ("prime", vec![1, 3, 5, 7, 11]),
+    ///     ("acab", vec![13, 12]),
+    /// ]);
+    /// ```
+    pub fn from<S, K, M, V>(name: S, map: M) -> Self
+    where
+        S: Into<String>,
+        K: Into<String>,
+        M: IntoIterator<Item = (K, V)>,
+        V: IntoIterator<Item = u8>,
+    {
+        let name = name.into();
+        let map = map
+            .into_iter()
+            .map(|(k, v)| (k.into(), v.into_iter().collect()))
+            .collect();
+        Self { name, map }
+    }
+
+    /// Return this entries name
+    pub fn name(&self) -> &String {
+        &self.name
+    }
+
+    /// Add (and override) a key-value map and return the modified map
+    pub fn add<K, V>(mut self, k: K, v: V) -> Self
+    where
+        K: Into<String>,
+        V: Into<Vec<u8>>,
+    {
+        self.map.insert(k.into(), v.into());
+        self
+    }
+
+    /// Delete a key and return the modified map
+    pub fn delete<K: Into<String>>(mut self, k: K) -> Self {
+        self.map.remove(&k.into());
+        self
+    }
+}
+
+impl Deref for MetadataMap {
+    type Target = BTreeMap<String, Vec<u8>>;
+    fn deref(&self) -> &Self::Target {
+        &self.map
+    }
+}
+
+impl DerefMut for MetadataMap {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.map
+    }
 }
 
 /// Represents a service using libqaul

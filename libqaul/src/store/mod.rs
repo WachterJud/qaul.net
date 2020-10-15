@@ -10,9 +10,10 @@ mod messages;
 pub(crate) use messages::MsgUtils;
 
 mod services;
+pub(crate) use services::MetadataExt;
 
 mod users;
-pub(crate) use users::KeyWrap;
+pub(crate) use users::{UserProfileExt, KeyWrap};
 
 use crate::{messages::SigTrust, Identity};
 use alexandria::record::{kv::Value, RecordRef};

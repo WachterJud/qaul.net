@@ -1,12 +1,12 @@
 //! User profile database wrappers (models)
 
-use super::Conv;
+use super::{Conv, FromRecord};
 use crate::{
     security::Keypair,
     users::{UserProfile, UserUpdate},
 };
 use alexandria::{
-    record::{kv::Value, Record},
+    record::{kv::Value, RecordRef},
     utils::Diff,
 };
 use bincode;
@@ -29,8 +29,8 @@ impl KeyWrap {
     }
 }
 
-impl From<&Record> for KeyWrap {
-    fn from(rec: &Record) -> Self {
+impl FromRecord<KeyWrap> for KeyWrap {
+    fn from_rec(rec: RecordRef) -> Self {
         KeyWrap(
             bincode::deserialize(
                 rec.kv()
@@ -47,8 +47,8 @@ impl From<&Record> for KeyWrap {
 }
 
 /// Get a UserProfile from a record
-impl From<&Record> for UserProfile {
-    fn from(rec: &Record) -> Self {
+impl FromRecord<UserProfile> for UserProfile {
+    fn from_rec(rec: RecordRef) -> Self {
         let kv = rec.kv();
 
         Self {
@@ -68,9 +68,15 @@ impl From<&Record> for UserProfile {
     }
 }
 
-impl UserProfile {
+// FIXME: Combine all the diff tools
+pub(crate) trait UserProfileExt {
+    fn init_diff(&self) -> Vec<Diff>;
+    fn gen_diff(&self, update: UserUpdate) -> Diff;
+}
+
+impl UserProfileExt for UserProfile {
     /// Generate the first insert diff based on an empty record
-    pub(crate) fn init_diff(&self) -> Vec<Diff> {
+    fn init_diff(&self) -> Vec<Diff> {
         let mut v = vec![Diff::map().insert(UID, self.id.as_bytes().to_vec())];
 
         if let Some(ref d_name) = self.display_name {
@@ -107,7 +113,7 @@ impl UserProfile {
     }
 
     /// Diff based on how a `UserUpdate` applies to a `UserProfile`
-    pub(crate) fn gen_diff(&self, update: UserUpdate) -> Diff {
+    fn gen_diff(&self, update: UserUpdate) -> Diff {
         use UserUpdate::*;
 
         match update {

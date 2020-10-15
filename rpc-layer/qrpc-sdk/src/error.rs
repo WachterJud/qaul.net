@@ -1,3 +1,4 @@
+
 //! RPC related error handling
 
 use std::fmt::{self, Display, Formatter};

@@ -1,5 +1,5 @@
 use crate::{
-    error::Result,
+    error::{ratman, Result},
     users::{UserProfile, UserUpdate},
     Identity, Qaul,
 };
@@ -70,8 +70,8 @@ impl<'qaul> Users<'qaul> {
         let id = keyd.id;
 
         // Inform Router about new local user
-        self.q.router.add_user(id).await?;
-        self.q.router.online(id).await?;
+        self.q.router.add_user(id).await.map_err(|e| ratman(e))?;
+        self.q.router.online(id).await.map_err(|e| ratman(e))?;
 
         // Create user login
         self.q.users.create_local(keyd, pw).await;
@@ -98,7 +98,7 @@ impl<'qaul> Users<'qaul> {
         // If logout succeeds, we can delete the user
         self.q.announcer.offline(id).await;
         self.logout(user).await?;
-        self.q.router.del_user(id, true).await?;
+        self.q.router.del_user(id, true).await.map_err(|e| ratman(e))?;
         self.q.users.delete_local(id).await;
         Ok(())
     }
@@ -113,7 +113,7 @@ impl<'qaul> Users<'qaul> {
     /// Create a new session login for a local User
     pub async fn login(&self, user: Identity, pw: &str) -> Result<UserAuth> {
         let token = self.q.auth.new_login(user, pw)?;
-        self.q.router.online(user).await?;
+        self.q.router.online(user).await.map_err(|e| ratman(e))?;
         let auth = UserAuth(user, token);
         self.q.services.open_user(&auth).await;
 
@@ -130,7 +130,7 @@ impl<'qaul> Users<'qaul> {
         let (ref id, ref token) = self.q.auth.trusted(user.clone())?;
         self.q.services.close_user(&user).await;
         self.q.announcer.offline(*id).await;
-        self.q.router.offline(*id).await?;
+        self.q.router.offline(*id).await.map_err(|e| ratman(e))?;
         self.q.auth.logout(id, token)?;
         Ok(())
     }

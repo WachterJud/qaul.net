@@ -9,7 +9,12 @@ pub(crate) use self::store::{MsgStore, TAG_UNREAD};
 #[cfg(feature = "generate-message")]
 pub(crate) mod generator;
 
-use crate::{error::Result, helpers::Tag, security::Sec, users::UserStore};
+use crate::{
+    error::{bincode, Result},
+    helpers::Tag,
+    security::Sec,
+    users::UserStore,
+};
 use ratman::{
     netmod::Recipient as RatRecipient, Identity, Message as RatMessage, Router, TimePair,
 };
@@ -89,7 +94,10 @@ impl MsgUtils {
         router: &Router,
         msg: RatMessageProto,
     ) -> Result<()> {
-        Ok(router.send(msg.build(store).await).await?)
+        Ok(router
+            .send(msg.build(store).await)
+            .await
+            .map_err(|_| bincode())?)
     }
 
     pub(crate) fn extract_simple_payload(msg: &RatMessage) -> Option<Vec<u8>> {

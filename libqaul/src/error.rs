@@ -26,109 +26,12 @@ use std::{
     result::Result as StdResult,
 };
 
-/// `libqaul` specific Result with embedded Error
-///
-/// The returned `Error` can sometimes be considered non-fatal. Check
-/// the `Error` documentation for the specific returned variant to
-/// see, what level of fatality it should be interpreted as. Crashing
-/// on every returned `Err(_)` however is a bad idea.
-pub type Result<T> = StdResult<T, Error>;
+pub use libqaul_types::error::{Error, Result};
 
-/// `libqaul` service API error states
-///
-/// All errors that can occur in interaction with the API are encoded
-/// as variants on this enum. In most cases, no additional metadata is
-/// provided and needs to be inferred from whatever context or
-/// function call emitted the error. Check the variant doc comments
-/// for a broad overview, as well as detailed usage instructions.
-///
-/// ## A note on language
-///
-/// Most variants of this enum use either an `Invalid` or `No`
-/// prefix. Invalid data is data that was either not expected or badly
-/// formatted. `No` in this case takes the place of `Unknown`, meaning
-/// that a query could not be fulfilled.
-#[derive(Copy, Clone, Debug, PartialEq)]
-pub enum Error {
-    /// Not authorised to perform this action
-    NotAuthorised,
-    /// The desired user was not known
-    NoUser,
-    /// The provided contact already exists
-    ContactExists,
-    /// The desired contact does not exist
-    NoContact,
-    /// Invalid search query
-    InvalidQuery,
-    /// No data was returned for the provided query
-    NoData,
-    /// Invalid payload (probably too big)
-    InvalidPayload,
-    /// A function callback timed out
-    CallbackTimeout,
-    /// Signature with an unknown public key
-    NoSign,
-    /// Fraudulent signature for a known public key
-    BadSign,
-    /// A generic networking error occured
-    NetworkFault,
-    /// Failed to find a route to this user
-    NoRoute,
-    /// Some serialisation action failed
-    BadSerialise,
-    /// No such service was found
-    NoService,
-    /// A sevice with this name already exists
-    ServiceExists,
-    /// Some internal components failed to communicate
-    CommFault,
+pub(crate) fn bincode() -> Error {
+    Error::BadSerialise
 }
 
-impl Error {
-    pub fn help(&self) -> String {
-        match std::env::var("QAUL_LANG").as_ref().map(|s| s.as_str()) {
-            Ok("ar") => "حدث خطأ غير معروف",
-            Ok("de") => "Ein unbekannter Fehler ist aufgetreten",
-            _ => "An unknown Error occured",
-        }
-        .into()
-    }
-}
-
-impl Display for Error {
-    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        let msg = match self {
-            Self::NotAuthorised => "Not authorised to perform this action",
-            Self::NoUser => "The desired user was not known",
-            Self::ContactExists => "The provided contact already exists",
-            Self::NoContact => "The desired contact does not exist",
-            Self::InvalidQuery => "Invalid search query",
-            Self::NoData => "No data was returned for the provided query",
-            Self::InvalidPayload => "Invalid payload (probably too big)",
-            Self::CallbackTimeout => "A function callback timed out",
-            Self::NoSign => "Signature with an unknown public key",
-            Self::BadSign => "Fraudulent signature for a known public key",
-            Self::NetworkFault => "A generic networking error occured",
-            Self::NoRoute => "Failed to find a route to this user",
-            Self::BadSerialise => "Some serialisation action failed",
-            Self::NoService => "No such service was found",
-            Self::ServiceExists => "A sevice with this name already exists",
-            Self::CommFault => "Some internal components failed to communicate",
-        };
-        write!(f, "{}", msg)
-    }
-}
-
-impl StdError for Error {}
-
-impl From<bincode::Error> for Error {
-    fn from(_: bincode::Error) -> Self {
-        Error::BadSerialise
-    }
-}
-
-impl From<RatError> for Error {
-    fn from(_: RatError) -> Self {
-        Error::NetworkFault
-    }
+pub(crate) fn ratman(e: RatError) -> Error {
+    Error::NetworkFault
 }

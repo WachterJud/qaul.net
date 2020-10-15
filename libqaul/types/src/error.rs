@@ -12,7 +12,7 @@
 //! application. This way, it becomes easier for _your_ service to
 //! wrap errors, or to enumerate them more easily.
 //!
-//! On an `Error` enum, it is also possible to call `description()` to
+//! On an `Error` enum, it is also possible to call `help()` to
 //! get a plain text error description of what went wrong, and what it
 //! probably means. These are meant to simplify front-end development
 //! and avoid having applications return arbitrary codes.

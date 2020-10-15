@@ -28,6 +28,7 @@ dependencies = [
 name = "alexandria"
 version = "0.2.0"
 dependencies = [
+ "alexandria-tags",
  "async-std",
  "bincode",
  "chrono",
@@ -43,6 +44,14 @@ dependencies = [
  "tempfile",
  "tracing",
  "tracing-futures",
+]
+
+[[package]]
+name = "alexandria-tags"
+version = "0.1.0"
+dependencies = [
+ "hex",
+ "serde",
 ]
 
 [[package]]
@@ -1260,16 +1269,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2a60c7ce501c71e03a9c9c0d35b861413ae925bd979cc7a4e30d060069aaac8d"
 
 [[package]]
-name = "mime_guess"
-version = "2.0.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2684d4c2e97d99848d30b324b00c8fcc7e5c897b7cbb5819b09e7c90e8baf212"
-dependencies = [
- "mime",
- "unicase",
-]
-
-[[package]]
 name = "miniz_oxide"
 version = "0.4.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1695,39 +1694,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "qaul-chat"
-version = "0.1.0"
-dependencies = [
- "async-std",
- "bincode",
- "chrono",
- "futures",
- "jni",
- "libqaul",
- "ratman-harness",
- "serde",
- "tempfile",
- "tracing",
- "tracing-futures",
- "tracing-subscriber",
-]
-
-[[package]]
-name = "qaul-files"
-version = "0.1.0"
-dependencies = [
- "async-std",
- "bincode",
- "libqaul",
- "mime",
- "mime_guess",
- "ratman-identity",
- "serde",
- "tracing",
- "tracing-futures",
-]
-
-[[package]]
 name = "qaul-hubd"
 version = "0.2.0"
 dependencies = [
@@ -1744,25 +1710,6 @@ dependencies = [
  "ratman",
  "ratman-configure",
  "tracing",
- "tracing-subscriber",
-]
-
-[[package]]
-name = "qaul-voice"
-version = "0.1.0"
-dependencies = [
- "async-std",
- "bincode",
- "failure",
- "futures",
- "libqaul",
- "opus-rs",
- "ratman-harness",
- "rubato",
- "serde",
- "tempfile",
- "tracing",
- "tracing-futures",
  "tracing-subscriber",
 ]
 
@@ -1945,10 +1892,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "ratman-rpc"
-version = "0.1.0"
-
-[[package]]
 name = "redox_syscall"
 version = "0.1.57"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2000,16 +1943,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3acd125665422973a33ac9d3dd2df85edad0f4ae9b00dafb1a05e43a9f5ef8e7"
 dependencies = [
  "winapi 0.3.9",
-]
-
-[[package]]
-name = "rubato"
-version = "0.2.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7fa068ee8d7d8e4e58f56927c302258437c6a14b1b5f23f993521f215bb0322f"
-dependencies = [
- "log 0.4.11",
- "num-traits",
 ]
 
 [[package]]
@@ -2099,10 +2032,6 @@ dependencies = [
  "ryu",
  "serde",
 ]
-
-[[package]]
-name = "service-rpc"
-version = "0.1.0"
 
 [[package]]
 name = "sha2"
@@ -2487,15 +2416,6 @@ name = "typenum"
 version = "1.12.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "373c8a200f9e67a0c95e62a4f52fbf80c23b4381c05a17845531982fa99e6b33"
-
-[[package]]
-name = "unicase"
-version = "2.6.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "50f37be617794602aabbeee0be4f259dc1778fabe05e2d67ee8f79326d5cb4f6"
-dependencies = [
- "version_check",
-]
 
 [[package]]
 name = "unicode-bidi"

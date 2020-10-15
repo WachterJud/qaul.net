@@ -9,6 +9,7 @@ pub(crate) struct Dirs {
     root: PathBuf,
 }
 
+#[allow(unused)]
 impl Dirs {
     pub(crate) fn new<P: Into<PathBuf>>(root: P) -> Self {
         Self { root: root.into() }

@@ -1,7 +1,6 @@
 use crate::{
     core::{Session, SessionsApi},
     delta::{DeltaBuilder, DeltaType},
-    dir::Dirs,
     error::Result,
     meta::{tags::TagCache, users::UserTable},
     query::{Query, QueryIterator, QueryResult, SetQuery, SubHub, Subscription},

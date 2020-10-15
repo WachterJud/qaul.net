@@ -1,28 +1,20 @@
 [workspace]
 members = [
-    # Main storage database
+    # Encrypted & async database engine
     "utils/alexandria",
+    "utils/alexandria-tags",
 
     # main qaul.net service library
     "libqaul",
-
-    # libqaul additions
-    # "libqaul/http",
-    # "libqaul/ipc",
-    # "libqaul/rpc",
-    # "libqaul/ws",
+    # "libqaul/types",
 
     # RPC libraries
     "rpc-layer/qrpc-sdk",
     "rpc-layer/qrpc-broker",
+    
     "rpc-layer/libqaul-rpc",
-    "rpc-layer/ratman-rpc",
-    "rpc-layer/service-rpc",
-
-    # qaul.net main services
-    "libqaul/service/chat",
-    "libqaul/service/files",
-    "libqaul/service/voice",
+    # "rpc-layer/ratman-rpc",
+    # "rpc-layer/service-rpc",
 
     # decentralised routing protocol
     "ratman",
@@ -47,18 +39,6 @@ members = [
 
     # Set of services in qaul.net
     "services/ping",
-
-    # android build support
-    # "utils/android-support",
-
-    # android logging support
-    # "utils/android-tracing",
-
-    # test binaries
-    # "clients/multinode-test",
-    # "clients/linux-http-test",
-    # "clients/linux-voice-test",
-    # "clients/mini-tcp",
 
     # Actual target binaries
     "clients/hubdctl",

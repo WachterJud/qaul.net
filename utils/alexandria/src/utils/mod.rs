@@ -14,8 +14,7 @@ mod diff;
 pub use diff::{Diff, DiffSeg};
 pub(crate) use diff::{DiffExt, DiffResult};
 
-mod tag;
-pub use tag::{Tag, TagSet};
-
 mod path;
 pub use path::Path;
+
+pub use alexandria_tags::{Tag, TagSet};

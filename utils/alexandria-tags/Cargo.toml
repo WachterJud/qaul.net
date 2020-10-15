@@ -1,0 +1,11 @@
+[package]
+name = "alexandria-tags"
+description = "Alexandria search tag system"
+version = "0.1.0"
+authors = ["Kaiden Fey <kookie@spacekookie.de>"]
+license = "GPL-3.0-or-later"
+edition = "2018"
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"] }
+hex = "0.4"

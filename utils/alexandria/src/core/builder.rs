@@ -1,5 +1,4 @@
 use crate::{
-    dir::Dirs,
     error::Result,
     meta::{tags::TagCache, users::UserTable},
     query::SubHub,
@@ -31,6 +30,7 @@ use std::{path::Path, result::Result as StdResult};
 #[derive(Default)]
 pub struct Builder {
     /// The main offset path
+    #[allow(unused)]
     offset: Option<String>,
 }
 
@@ -60,7 +60,7 @@ impl Builder {
         // TODO: Check for a magic file here
         // TODO: load database with provided root secret
 
-        let root = Dirs::new(p);
+        // let root = Dirs::new(p);
         let users = RwLock::new(UserTable::new());
         let tag_cache = RwLock::new(TagCache::new());
 

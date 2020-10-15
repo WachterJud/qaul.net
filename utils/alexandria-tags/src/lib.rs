@@ -1,3 +1,12 @@
+//! Alexandria tagging system
+//!
+//! The internals of alexandria work with records and search tags.
+//! Records are fully encrypted, meaning that searching them in a
+//! reasonable amount of work is impossible.  To solve this problem
+//! Alexandria uses search tags, that are searched in a separately
+//! encrypted tag tables.  This way records can be searched via tags,
+//! without exposing their data bodies.
+
 use serde::{
     de::{Error, MapAccess, SeqAccess, Visitor},
     ser::SerializeStruct,

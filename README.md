@@ -22,8 +22,8 @@ overview of the available components.
 | Component   | Description      |
 |-------------|------------------|
 | [clients]   | qaul.net end-user applications for various platforms |
-| [docs]      | Contains manuals (for users and developers), and tools to build various pieces of documentation |
-| [emberweb]  | Cross-platform web interface bundled into  various user clients |
+| [docs]      | Manuals (for both users and developers), and tools to build and deploy different documentation |
+| [emberweb]  | Cross-platform web interface bundled in with various user clients |
 | [libqaul]   | Primary library of the qaul.net ecosystem.  Provides network messaging abstractions, user session management and discovery |
 | [licenses]  | Set of license texts that are in use in this repository |
 | [netmods]   | Platform-specific networking interface drivers |

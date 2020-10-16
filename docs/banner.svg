@@ -5,9 +5,9 @@
    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
    xmlns:svg="http://www.w3.org/2000/svg"
    xmlns="http://www.w3.org/2000/svg"
-   width="800"
-   height="400"
-   viewBox="0 0 211.66661 105.83334"
+   width="600"
+   height="300"
+   viewBox="0 0 158.74996 79.375005"
    version="1.1"
    id="svg8">
   <defs
@@ -28,25 +28,25 @@
      id="layer1">
     <text
        xml:space="preserve"
-       style="font-style:normal;font-weight:normal;font-size:70.5556px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
-       x="4.6249437"
-       y="65.579483"
+       style="font-style:normal;font-weight:normal;font-size:48.8828px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.18331"
+       x="5.3502893"
+       y="48.785175"
        id="text835"><tspan
          id="tspan833"
-         x="4.6249437"
-         y="65.579483"
-         style="font-size:70.5556px;stroke-width:0.264583">قول</tspan></text>
+         x="5.3502893"
+         y="48.785175"
+         style="font-size:48.8828px;stroke-width:0.18331">قول</tspan></text>
     <text
        xml:space="preserve"
-       style="font-style:normal;font-weight:normal;font-size:10.5833px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
-       x="6.5841336"
-       y="89.653214"
+       style="font-style:normal;font-weight:normal;font-size:7.33239px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.18331"
+       x="6.7076683"
+       y="65.464096"
        id="text839"><tspan
          id="tspan837"
-         x="6.5841336"
-         y="89.653214"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'.Aqua Kana';-inkscape-font-specification:'.Aqua Kana';stroke-width:0.264583"><tspan
-   style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-family:'.Aqua Kana';-inkscape-font-specification:'.Aqua Kana Semi-Bold'"
+         x="6.7076683"
+         y="65.464096"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'.Aqua Kana';-inkscape-font-specification:'.Aqua Kana';stroke-width:0.18331"><tspan
+   style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-family:'.Aqua Kana';-inkscape-font-specification:'.Aqua Kana Semi-Bold';stroke-width:0.18331"
    id="tspan841">qaul.net</tspan> - tools for the next revolution</tspan></text>
   </g>
 </svg>

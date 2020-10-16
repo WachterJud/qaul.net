@@ -1,13 +1,16 @@
-<br />
+<style>
+h1 { font-size: 5rem; margin: 1em 0 0;}
+.subtitle { padding: 0; margin: 0 6rem; }
+</style>
 
+<h1 align="center">قول</h1>
+<div class="subtitle"><strong>qaul.net</strong> — tools for the next revolation</div>
 <h1 align="center"> قول - qaul.net</h1>
 <div align="center">
- <strong>decentralised ad-hoc wireless communication</strong>
+	<strong>decentralised ad-hoc wireless communication</strong>
 </div>
 
 <br />
-
-<hr />
 
 qaul.net is a decentralised networking project, aiming to create
 easier to use solutions to ad-hoc wireless communication.  It supports
@@ -50,9 +53,10 @@ overview of the available components.
 [netmods]: ./netmods
 [nix]: ./nix
 [ratman]: ./ratman
-[rpc-: ./rpc
+[rpc]: ./rpc
 [tests]: ./tests
 [utils]: ./utils
+
 It supports instant messaging, voice calls, social media, radio
 broadcast, and file sharing — all in a single app. Additionally it is
 a suite of free software libraries, meaning that anyone can study and

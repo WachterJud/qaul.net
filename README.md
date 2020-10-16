@@ -46,13 +46,36 @@ overview of the available components.
 [utils]: ./utils
 
 
+## Decentralised and delay tolerant networking
+
+Most traditional networking infrastructure (both the transmission
+layer, as well as applications) operate in a very centralised way.
+Clients connect to servers, and devices to towers.  This makes it very
+vulnerable to attacks.  Natural disasters or opressive governments can
+easily shut down communication for millions of people, potentially
+putting people at risk, and slowing down any activist movement.
+
+qaul.net aims to solve this issue by creating decentralised circuits
+between devices directly.  Additionally, it's routing approach takes
+into account that connections are imperfect, and that a stable
+connection between two devices might be impossible.  For this scenario
+the network can cache undelivered messages, carrying them towards
+their destination until the recipient comes back online.
+
+Routing in a qaul network is based on public keys, creating a large
+enough address space for big communities.  Connecting devices together
+happens via channel-specific drivers.  When creating a circuit,
+roaming between various connection modes is common.
+
+
 ## How to use
 
 There's no single way to use qaul.net.  Various platforms support
 different clients, and a qaul network can consist of many different
 components interacting with each other.  To get started, check out the
+[user manual]!
 
-[user manual](https://docs.qaul.net/user)!
+[user manual]: https://docs.qaul.net/user
 
 
 ## Contributing
@@ -62,8 +85,7 @@ application that uses qaul for networking?  Check out the
 [contributor manual] to learn about code internals and advanced
 technical concepts.
 
-
-## FAQ
+[contributor manual]: https://docs.qaul.net/contributors
 
 
 ## License

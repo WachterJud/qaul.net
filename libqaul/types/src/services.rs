@@ -46,7 +46,7 @@ impl MetadataMap {
     /// Create a metadata map from a name and initialised map construct
     ///
     /// ```
-    /// # use libqaul::services::MetadataMap;
+    /// # use libqaul_types::services::MetadataMap;
     /// MetadataMap::from("numbers", vec![("fav", vec![1, 2, 3, 4])]);
     /// ```
     ///
@@ -54,7 +54,7 @@ impl MetadataMap {
     /// your map in-place:
     ///
     /// ```
-    /// # use libqaul::services::MetadataMap;
+    /// # use libqaul_types::services::MetadataMap;
     /// MetadataMap::from("numbers", vec![
     ///     ("fav", vec![1, 2, 3, 4]),
     ///     ("prime", vec![1, 3, 5, 7, 11]),

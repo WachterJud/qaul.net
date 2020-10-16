@@ -30,14 +30,16 @@
 //! [`RpcSocket`]: ./struct.RpcSocket.html
 //!
 //! ```
-//! # fn foo() -> Result<(), Box<std::error::Error>> {
+//! # async fn foo() -> Result<(), qrpc_sdk::error::RpcError> {
 //! use qrpc_sdk::{Service, RpcSocket, default_socket_path};
 //!
-//! let serv = Service::new("com.example.myapp", 1, "A simple app");
-//! let sockt = RpcSocket::new(default_socket_path())?;
+//! let mut serv = Service::new("com.example.myapp", 1, "A simple app");
+//! let (addr, port) = default_socket_path();
+//! let sock = RpcSocket::connect(addr, port).await?;
 //!
-//! serv.register(sock)?;
+//! serv.register(sock).await?;
 //! println!("Service registered! ID: {}", serv.hash_id().unwrap());
+//! # Ok(())
 //! # }
 //! ```
 //!
@@ -46,13 +48,16 @@
 //! initialiser.
 //!
 //! ```
-//! use libqaul_rpc::Api;
-//! # async foo() -> Result<(), Box<std::error::Error>> {
-//! # let serv = Service::new("com.example.myapp", 1, "A simple app");
-//! # let sock = RpcSocket::new(default_socket_path())?;
-//! # serv.register(sock)?;
+//! # async fn foo() -> Result<(), qrpc_sdk::error::RpcError> {
+//! # use qrpc_sdk::{Service, RpcSocket, default_socket_path};
+//! # let mut serv = Service::new("com.example.myapp", 1, "A simple app");
+//! # let (addr, port) = default_socket_path();
+//! # let sock = RpcSocket::connect(addr, port).await?;
+//! # serv.register(sock).await?;
 //!
-//! serv.connect(libqaul_rpc::Init).await?;
+//! // serv.connect(libqaul_rpc::Init).await?;
+//! # Ok(())
+//! # }
 //! ```
 //!
 //! This will establish a connection with the `libqaul` component and
@@ -66,14 +71,18 @@
 //! component.  You can get a copy of it via your service handle.
 //!
 //! ```
-//! # async foo() -> Result<(), Box<std::error::Error>> {
-//! # let serv = Service::new("com.example.myapp", 1, "A simple app");
-//! # let sock = RpcSocket::new(default_socket_path())?;
-//! # serv.register(sock)?;
-//! use libqaul_rpc::Api;
+//! # async fn foo() -> Result<(), qrpc_sdk::error::RpcError> {
+//! # use qrpc_sdk::{Service, RpcSocket, default_socket_path};
+//! # let mut serv = Service::new("com.example.myapp", 1, "A simple app");
+//! # let (addr, port) = default_socket_path();
+//! # let sock = RpcSocket::connect(addr, port).await?;
+//! # serv.register(sock).await?;
 //!
-//! let users = serv.component(libqaul_rpc::Id).list_users().await?;
-//! println!("Available users: {:?}", users);
+//! // net.qaul.libqaul is exposed as libqaul_rpc.COMP_ID
+//! // let users = serv.component("net.qaul.libqaul").list_users().await?;
+//! // println!("Available users: {:?}", users);
+//! # Ok(())
+//! # }
 //! ```
 //!
 //! If you want to see a minimal example of the smallest functional

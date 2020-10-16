@@ -55,8 +55,8 @@ impl<'s, T: FromPointerReader<'s>> MsgReader<'s, T> {
     /// `service::Reader`.
     ///
     /// ```
-    /// # use qrpc_sdk::io::Result;
-    /// use qrpc_sdk::{io::MsgReader, types::service};
+    /// # use qrpc_sdk::parser::Result;
+    /// use qrpc_sdk::{parser::MsgReader, types::service};
     ///
     /// # fn run_code() -> Result<()> {
     /// # let buf = vec![];
@@ -73,8 +73,8 @@ impl<'s, T: FromPointerReader<'s>> MsgReader<'s, T> {
     /// defined in this crate.
     ///
     /// ```
-    /// use qrpc_sdk::{io::MsgReader, rpc::capabilities::{Reader, Which}};
-    /// # fn foo() -> Result<(), Box<std::error::Error>> {
+    /// use qrpc_sdk::{parser::MsgReader, error::RpcError, rpc::capabilities::{Reader, Which}};
+    /// # fn foo() -> Result<(), RpcError> {
     /// # let reader = qrpc_sdk::builders::parse_rpc_msg(vec![]).unwrap();
     ///
     /// // Get the `reader` by calling `builders::parse_rpc_msg(...)`
@@ -82,7 +82,7 @@ impl<'s, T: FromPointerReader<'s>> MsgReader<'s, T> {
     /// match r.which() {
     ///     Ok(Which::Register(Ok(reg))) => handle_register(reg),
     ///     Ok(Which::Unregister(Ok(unreg))) => handle_unregister(unreg),
-    ///     Ok(Which::Upgrade(Ok(upgr))) => handle_upgrade(uphr),
+    ///     Ok(Which::Upgrade(Ok(upgr))) => handle_upgrade(upgr),
     ///     _ => eprintln!("Invalid variant/ decode!"),
     /// }
     /// # Ok(())
@@ -90,9 +90,9 @@ impl<'s, T: FromPointerReader<'s>> MsgReader<'s, T> {
     ///
     /// use qrpc_sdk::rpc::{register, unregister, upgrade};
     ///
-    /// fn handle_register(_: register::Reader) {}
-    /// fn handle_unregister(_: unregister::Reader) {}
-    /// fn handle_upgrade(_: upgrade::Reader) {}
+    /// fn handle_register(_: register::Reader) { /* ... */}
+    /// fn handle_unregister(_: unregister::Reader) { /* ... */}
+    /// fn handle_upgrade(_: upgrade::Reader) { /* ... */}
     /// ```
     ///
     /// The above code can be found in the [qrpc-broker] crate.  Your

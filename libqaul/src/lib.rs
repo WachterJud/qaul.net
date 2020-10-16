@@ -61,6 +61,9 @@ pub mod users;
 #[cfg(feature = "ffi-java")]
 pub mod ffi;
 
+#[cfg(feature = "rpc")]
+pub mod rpc;
+
 // Core state should be in the root
 mod qaul;
 pub use qaul::{Identity, Qaul, QaulRef};

@@ -110,5 +110,5 @@ fn swap() {
     let ptr = AtomPtr::new(ts1.clone());
     let still_ts1 = ptr.swap(ts2);
 
-    assert_eq!(ts1, *still_ts1);
+    assert_eq!(ts1, *still_ts1.as_ref());
 }

@@ -1,4 +1,4 @@
-<img src="docs/banner.svg" />
+![](docs/banner.svg)
 
 **qaul** is a decentralised networking project, aiming to create easy
 to use solutions to ad-hoc wireless communication.  It supports many

@@ -1,13 +1,4 @@
-<div>
-<style>
-h1 { font-size: 5rem; margin: 1em 0 0;}
-.subtitle { padding: 0; margin: 0 6rem; }
-</style>
-
-<h1 align="center">قول</h1>
-<div class="subtitle"><strong>qaul.net</strong> — tools for the next revolation</div>
-</div>
-
+![](docs/banner.svg)
 
 qaul.net is a decentralised networking project, aiming to create
 easier to use solutions to ad-hoc wireless communication.  It supports

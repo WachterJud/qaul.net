@@ -1,14 +1,13 @@
 ![](docs/banner.svg)
 
-qaul.net is a decentralised networking project, aiming to create
-easier to use solutions to ad-hoc wireless communication.  It supports
-many common desktop operating systems (Linux, Windows, MacOS, BSD,
-...), and Android mobile phones.  iOS is a desired target, but isn't
-yet implemented.
+**qaul** is a decentralised networking project, aiming to create easy
+to use solutions to ad-hoc wireless communication.  It supports many
+common desktop operating systems (Linux, Windows, MacOS, BSD, ...),
+and Android mobile phones.  iOS support is on the roadmap.
 
-qaul.net is both a cross-platform end-user application, providing
-messaging, filesharing, and voice calls, but also a toolkit to create
-fully decentralised third-party applications.
+qaul.net is both a cross-platform end-user application, implementing
+messaging, filesharing, and voice calls, but also a library toolkit to
+create fully decentralised third-party applications.
 
 In order to be able to run on unpriviledged mobile platforms qaul.net
 implements decentralised routing protocols and utilities entirely in

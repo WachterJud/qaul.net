@@ -24,8 +24,8 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="1.1101557"
-     inkscape:cx="295.92534"
-     inkscape:cy="20.980308"
+     inkscape:cx="346.59309"
+     inkscape:cy="33.591152"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      inkscape:document-rotation="0"
@@ -44,7 +44,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -55,26 +55,25 @@
     <text
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:20.349px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.0763086"
-       x="0.88661391"
-       y="17.9032"
+       x="6.6065321"
+       y="20.604502"
        id="text835"><tspan
          sodipodi:role="line"
          id="tspan833"
-         x="0.88661391"
-         y="17.9032"
+         x="6.6065321"
+         y="20.604502"
          style="font-size:20.349px;stroke-width:0.0763086">قول</tspan></text>
     <text
        xml:space="preserve"
-       style="font-style:normal;font-weight:normal;font-size:6.35px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.122698"
-       x="35.954342"
-       y="18.148708"
+       style="font-style:normal;font-weight:normal;font-size:11.2889px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.122698"
+       x="49.611767"
+       y="16.294239"
        id="text839"><tspan
          sodipodi:role="line"
          id="tspan837"
-         x="35.954342"
-         y="18.148708"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:6.35px;font-family:'.Aqua Kana';-inkscape-font-specification:'.Aqua Kana';stroke-width:0.122698"><tspan
-   style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-size:6.35px;font-family:'.Aqua Kana';-inkscape-font-specification:'.Aqua Kana Semi-Bold';stroke-width:0.122698"
-   id="tspan841">qaul.net</tspan> - tools for the next revolution</tspan></text>
+         x="49.611767"
+         y="16.294239"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:11.2889px;font-family:'Bluu Next';-inkscape-font-specification:'Bluu Next';stroke-width:0.122698"
+         dx="0 0 0 0 0 0 0">qaul.net</tspan></text>
   </g>
 </svg>

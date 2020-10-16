@@ -5,13 +5,37 @@
    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
    xmlns:svg="http://www.w3.org/2000/svg"
    xmlns="http://www.w3.org/2000/svg"
-   width="600"
-   height="300"
-   viewBox="0 0 158.74996 79.375005"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="400"
+   height="200"
+   viewBox="0 0 105.83331 52.916671"
    version="1.1"
-   id="svg8">
+   id="svg8"
+   sodipodi:docname="banner.svg"
+   inkscape:version="1.0.1 (c497b03c, 2020-09-10)">
   <defs
      id="defs2" />
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="1.4144223"
+     inkscape:cx="193.74133"
+     inkscape:cy="120.09311"
+     inkscape:document-units="mm"
+     inkscape:current-layer="layer1"
+     inkscape:document-rotation="0"
+     showgrid="false"
+     units="px"
+     inkscape:window-width="1225"
+     inkscape:window-height="755"
+     inkscape:window-x="55"
+     inkscape:window-y="23"
+     inkscape:window-maximized="0" />
   <metadata
      id="metadata5">
     <rdf:RDF>
@@ -25,28 +49,32 @@
     </rdf:RDF>
   </metadata>
   <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
      id="layer1">
     <text
        xml:space="preserve"
-       style="font-style:normal;font-weight:normal;font-size:48.8828px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.18331"
-       x="5.3502893"
-       y="48.785175"
+       style="font-style:normal;font-weight:normal;font-size:32.7196px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.122698"
+       x="4.3947515"
+       y="32.519032"
        id="text835"><tspan
+         sodipodi:role="line"
          id="tspan833"
-         x="5.3502893"
-         y="48.785175"
-         style="font-size:48.8828px;stroke-width:0.18331">قول</tspan></text>
+         x="4.3947515"
+         y="32.519032"
+         style="font-size:32.7196px;stroke-width:0.122698">قول</tspan></text>
     <text
        xml:space="preserve"
-       style="font-style:normal;font-weight:normal;font-size:7.33239px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.18331"
-       x="6.7076683"
-       y="65.464096"
+       style="font-style:normal;font-weight:normal;font-size:4.90792px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.122698"
+       x="5.3033099"
+       y="43.683022"
        id="text839"><tspan
+         sodipodi:role="line"
          id="tspan837"
-         x="6.7076683"
-         y="65.464096"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'.Aqua Kana';-inkscape-font-specification:'.Aqua Kana';stroke-width:0.18331"><tspan
-   style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-family:'.Aqua Kana';-inkscape-font-specification:'.Aqua Kana Semi-Bold';stroke-width:0.18331"
+         x="5.3033099"
+         y="43.683022"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'.Aqua Kana';-inkscape-font-specification:'.Aqua Kana';stroke-width:0.122698"><tspan
+   style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-family:'.Aqua Kana';-inkscape-font-specification:'.Aqua Kana Semi-Bold';stroke-width:0.122698"
    id="tspan841">qaul.net</tspan> - tools for the next revolution</tspan></text>
   </g>
 </svg>

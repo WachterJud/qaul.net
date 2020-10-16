@@ -5,32 +5,33 @@ to use solutions to ad-hoc wireless communication.  It supports many
 common desktop operating systems (Linux, Windows, MacOS, BSD, ...),
 and Android mobile phones.  iOS support is on the roadmap.
 
-qaul.net is both a cross-platform end-user application, implementing
-messaging, filesharing, and voice calls, but also a library toolkit to
-create fully decentralised third-party applications.
+**qaul.net** is both a cross-platform end-user application,
+**implementing messaging**, **filesharing**, and **voice calls**, but
+also a library toolkit to create fully decentralised third-party
+applications.
 
 In order to be able to run on unpriviledged mobile platforms qaul.net
-implements decentralised routing protocols and utilities entirely in
-userspace.  The codebase is largely written in Rust, with only a few
-compatibility components being written in more platform specific
-languages.
+implements **decentralised routing protocols** and utilities entirely
+in userspace.  The codebase is largely written in
+[Rust](https://rustlang.org), with only a few compatibility components
+being written in more platform specific languages.
 
 The project is entirely contained in this repository.  Following is an
 overview of the available components.
 
-| Component | Description      |
-|-----------|------------------|
-| [clients]    | qaul.net end-user applications for various platforms |
-| [docs]    | Contains manuals (for users and developers), and tools to build various pieces of documentation |
-| [emberweb] | Cross-platform web interface bundled into  various user clients |
-| [libqaul] | Primary library of the qaul.net ecosystem.  Provides network messaging abstractions, user session management and discovery |
-| [licenses] | Set of license texts that are in use in this repository |
-| [netmods] | Platform-specific networking interface drivers |
-| [nix] | [nix](https://nixos.org) related build utilities |
-| [ratman] | A decentralised userspace packet router |
+| Component   | Description      |
+|-------------|------------------|
+| [clients]   | qaul.net end-user applications for various platforms |
+| [docs]      | Contains manuals (for users and developers), and tools to build various pieces of documentation |
+| [emberweb]  | Cross-platform web interface bundled into  various user clients |
+| [libqaul]   | Primary library of the qaul.net ecosystem.  Provides network messaging abstractions, user session management and discovery |
+| [licenses]  | Set of license texts that are in use in this repository |
+| [netmods]   | Platform-specific networking interface drivers |
+| [nix]       | [nix](https://nixos.org) related build utilities |
+| [ratman]    | A decentralised userspace packet router |
 | [rpc-layer] | qaul.net specific rpc system (qrpc) to support third-party components |
-| [tests] | Integrated test suite for various components.  Most of the code also has inline tests |
-| [utils] | Set of utilities that are used in various places and don't fit anywhere else |
+| [tests]     | Integrated test suite for various components.  Most of the code also has inline tests |
+| [utils]     | Set of utilities that are used in various places and don't fit anywhere else |
 
 [clients]: ./clients
 [docs]: ./docs
@@ -40,25 +41,9 @@ overview of the available components.
 [netmods]: ./netmods
 [nix]: ./nix
 [ratman]: ./ratman
-[rpc]: ./rpc
+[rpc-layer]: ./rpc-layer
 [tests]: ./tests
 [utils]: ./utils
-
-It supports instant messaging, voice calls, social media, radio
-broadcast, and file sharing — all in a single app. Additionally it is
-a suite of free software libraries, meaning that anyone can study and
-modify it, and use it to create their own apps that can operate on a
-qaul network, independent of the internet.
-
-**qaul.net** is an Internet independent ad-hoc wireless mesh-network
-suite that harnesses the power of everyday devices such as computers
-and smartphones to create a **Non-Centralized**, **Mesh Network** on
-which users can share files, have voice chats and send each other
-messages, however the power of qaul.net allows endless services over
-the service API. qaul.net removes the dependence on the centralized
-services such as the Internet and cellular networks and creates a
-network that anyone can be part of and share freely with no censorship
-what so ever.
 
 
 ## Development status

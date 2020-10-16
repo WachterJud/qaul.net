@@ -46,49 +46,24 @@ overview of the available components.
 [utils]: ./utils
 
 
-## Development status
+## How to use
 
-The project is currently being re-written for a more modular and
-portable approach. The new Release will be qaul.net 2.0. Please check
-our [milestones] & [issues] to get an idea of the development plan and
-status. If you want to get involved, see how to [participate] and read 
-the [contributors-guide].
+There's no single way to use qaul.net.  Various platforms support
+different clients, and a qaul network can consist of many different
+components interacting with each other.  To get started, check out the
 
-For the latest stable release, check the [`release-1.0.0`][release]
-branch.
-
-[milestones]: https://git.open-communication.net/groups/qaul/-/milestones
-[issues]: https://git.open-communication.net/qaul/qaul.net/issues
-[participate]: https://qaul.net/#participation
-[contributors-guide]: https://docs.qaul.net/contributors/
-[release]: https://git.open-communication.net/qaul/qaul.net/tree/release-1.0.0
+[user manual](https://docs.qaul.net/user)!
 
 
-## Build Instructions
+## Contributing
 
-The qaul.net project has many libraries and clients, for different
-platforms.  Check the "clients" directory for instructions on how to
-build them.  Because some platforms require some bootstrapping you may
-have to build different parts in sequence: we don't currently have an
-overarching build system for this.
-
-To build the rust libraries for most platforms, simply run `cargo
-build --release` (for release mode).  To build android, check the
-[`build.sh`](./clients/android/build.sh) in that client.  The web UI
-is built with emberJS and con be found [here](webgui).
-
-To build the web stack on Linux, you can build the ember UI with
-`ember dist`, then move the output to `libqaul/http/ui`, so that they
-can be included in the web server, which will then serve them via
-`clients/linux-http-test` or `clients/android`.
-
-The repo has a `shell.nix` if you want to use nix to get dependencies,
-however this doesn't actually build the project.
+Want to help with the development of qaul.net, or write a third-party
+application that uses qaul for networking?  Check out the
+[contributor manual] to learn about code internals and advanced
+technical concepts.
 
 
-## Documentation
-
-Documentation is available on [docs.qaul.net](https://docs.qaul.net).
+## FAQ
 
 
 ## License

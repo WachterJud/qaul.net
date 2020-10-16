@@ -1,15 +1,63 @@
-<h1 align="center">Tide</h1>
+<br />
+
+<h1 align="center"> قول - qaul.net</h1>
 <div align="center">
- <h1> قول </h1>
-</di>
+ <strong>decentralised ad-hoc wireless communication</strong>
+</div>
 
 <br />
 
+<hr />
 
+qaul.net is a decentralised networking project, aiming to create
+easier to use solutions to ad-hoc wireless communication.  It supports
+many common desktop operating systems (Linux, Windows, MacOS, BSD,
+...), and Android mobile phones.  iOS is a desired target, but isn't
+yet implemented.
 
-![http://qaul.net/](https://git.open-communication.net/qaul/qaul.net/raw/release-1.0.0/doc/qaul-net.png)
+qaul.net is both a cross-platform end-user application, providing
+messaging, filesharing, and voice calls, but also a toolkit to create
+fully decentralised third-party applications.
 
-# qaul.net [![pipeline status](https://git.open-communication.net/qaul/qaul.net/badges/master/pipeline.svg)](https://git.open-communication.net/qaul/qaul.net/commits/master)
+In order to be able to run on unpriviledged mobile platforms qaul.net
+implements decentralised routing protocols and utilities entirely in
+userspace.  The codebase is largely written in Rust, with only a few
+compatibility components being written in more platform specific
+languages.
+
+The project is entirely contained in this repository.  Following is an
+overview of the available components.
+
+| Component | Description      |
+|-----------|------------------|
+| [clients]    | qaul.net end-user applications for various platforms |
+| [docs]    | Contains manuals (for users and developers), and tools to build various pieces of documentation |
+| [emberweb] | Cross-platform web interface bundled into  various user clients |
+| [libqaul] | Primary library of the qaul.net ecosystem.  Provides network messaging abstractions, user session management and discovery |
+| [licenses] | Set of license texts that are in use in this repository |
+| [netmods] | Platform-specific networking interface drivers |
+| [nix] | [nix](https://nixos.org) related build utilities |
+| [ratman] | A decentralised userspace packet router |
+| [rpc-layer] | qaul.net specific rpc system (qrpc) to support third-party components |
+| [tests] | Integrated test suite for various components.  Most of the code also has inline tests |
+| [utils] | Set of utilities that are used in various places and don't fit anywhere else |
+
+[clients]: ./clients
+[docs]: ./docs
+[emberweb]: ./emberweb
+[libqaul]: ./libqaul
+[licenses]: ./licenses
+[netmods]: ./netmods
+[nix]: ./nix
+[ratman]: ./ratman
+[rpc-: ./rpc
+[tests]: ./tests
+[utils]: ./utils
+It supports instant messaging, voice calls, social media, radio
+broadcast, and file sharing — all in a single app. Additionally it is
+a suite of free software libraries, meaning that anyone can study and
+modify it, and use it to create their own apps that can operate on a
+qaul network, independent of the internet.
 
 **qaul.net** is an Internet independent ad-hoc wireless mesh-network
 suite that harnesses the power of everyday devices such as computers

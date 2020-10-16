@@ -1,3 +1,12 @@
+<h1 align="center">Tide</h1>
+<div align="center">
+ <h1> قول </h1>
+</di>
+
+<br />
+
+
+
 ![http://qaul.net/](https://git.open-communication.net/qaul/qaul.net/raw/release-1.0.0/doc/qaul-net.png)
 
 # qaul.net [![pipeline status](https://git.open-communication.net/qaul/qaul.net/badges/master/pipeline.svg)](https://git.open-communication.net/qaul/qaul.net/commits/master)

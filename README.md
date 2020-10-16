@@ -16,7 +16,7 @@ in userspace.  The codebase is largely written in
 [Rust](https://rustlang.org), with only a few compatibility components
 being written in more platform specific languages.
 
-ALl parts of the project are contained in this repository.  Following
+All parts of the project are contained in this repository.  Following
 is an overview of the available components.  Each component has
 additional information.
 
@@ -69,7 +69,7 @@ happens via channel-specific drivers.  When creating a circuit,
 roaming between various connection modes is common.
 
 To learn more about the technical side of qaul.net, check out the
-[contributors manual].
+[contributor manual].
 
 ## How to use
 
@@ -78,14 +78,14 @@ different clients, and a qaul network can consist of many different
 components interacting with each other.  To get started, check out the
 [user manual]!
 
-[user manual]: https://docs.qaul.net/user
+[user manual]: https://docs.qaul.net/users
 
 
 ## Contributing
 
 Social processes, code, and design guidelines are outlined in the
-[contributors manual].  We have a developer chat hosted on [matrix];
-we would be happy to answer any questions you have there.  For more
+[contributor manual].  We have a developer chat hosted on [matrix]
+where we would be happy to answer any questions you have.  For more
 long-form posting we have a [mailing list].  We also accept patches
 via e-mail!
 
@@ -99,11 +99,12 @@ out the [services] section.
 
 ## License
 
-qaul.net is free and open source software licensed under the [GNU
-Affero General Public License version 3 or
-later](licenses/agpl-3.0.md).
+qaul.net is free software licensed under the
+[GNU Affero General Public License version 3](licenses/agpl-3.0.md) or
+later.
 
 **Additional Permissions:** For Submission to the Apple App Store:
+
 Provided that you are otherwise in compliance with the AGPLv3 for each
 covered work you convey (including without limitation making the
 Corresponding Source available in compliance with Section 6 of the

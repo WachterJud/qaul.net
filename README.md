@@ -59,14 +59,14 @@ putting people at risk, and slowing down any activist movement.
 qaul.net aims to solve this issue by creating decentralised circuits
 between devices directly.  Additionally, it's routing approach takes
 into account that connections are imperfect, and that a stable link
-between two devices might not be impossible.  For this scenario the
+between two devices might not be possible.  For this scenario the
 network caches undelivered messages, carrying them towards their
 destination until the recipient comes back online.
 
-Routing in a qaul network is based on public keys, creating a large
-enough address space for big communities.  Connecting devices together
-happens via channel-specific drivers.  When creating a circuit,
-roaming between various connection modes is common.
+Routing in a qaul network is done via a users public keys, creating a
+32 byte large address space.  Connecting devices together happens via
+channel-specific drivers.  When creating a circuit, roaming between
+different connection modes is common.
 
 To learn more about the technical side of qaul.net, check out the
 [contributor manual].

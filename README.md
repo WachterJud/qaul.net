@@ -36,8 +36,9 @@ additional information in their respective README files.
 | [nix]       | [Nix](https://nixos.org) related build utilities |
 | [ratman]    | A decentralised and modular userspace frame router |
 | [rpc-layer] | qaul.net specific rpc system (qrpc) to support third-party components |
+| [services]  | A collection of services that use qaul as their network backend.  Some are part of qaul.net, others are development examples |
 | [tests]     | Integrated test suite for various components.  Most of the code also has inline tests |
-| [utils]     | Set of utilities that are used in various places and don't fit anywhere else |
+| [utils]     | Various utilities in use all over the repository that don't fit in anywhere else |
 
 [clients]: ./clients
 [docs]: ./docs

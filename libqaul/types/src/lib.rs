@@ -15,3 +15,6 @@ pub mod error;
 pub mod messages;
 pub mod services;
 pub mod users;
+
+#[cfg(feature = "rpc")]
+pub mod rpc;

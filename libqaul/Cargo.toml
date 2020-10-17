@@ -37,8 +37,8 @@ serde_json = "1.0"
 tempfile = "3.0"
 
 [features]
-default = ["generate-message", "testing"]
-generate-message = []
-testing = ["tempfile", "netmod-mem"]
+default = ["generate-message", "testing", "rpc"] # TODO: remove rpc default?
 ffi-java = ["jni"]
+generate-message = []
 rpc = ["qrpc-sdk"]
+testing = ["tempfile", "netmod-mem"]

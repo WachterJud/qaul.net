@@ -97,33 +97,3 @@ impl<'qaul> Contacts<'qaul> {
         Ok(vec![])
     }
 }
-
-// impl Qaul {
-
-//     /// Find a subset of contacts with some query
-//     pub fn contacts_query(
-//         &self,
-//         user: UserAuth,
-//         query: ContactQuery,
-//     ) -> QaulResult<Vec<UserProfile>> {
-//         let (ref my_id, ref token) = user.trusted()?;
-//         self.auth.verify_token(my_id, token)?;
-//         self.contacts
-//             .query(my_id, query)?
-//             .into_iter()
-//             .map(|ref id| self.users.get(id))
-//             .collect()
-//     }
-
-//     /// Enumerate all contacts known by a user
-//     pub fn contacts_get_all(&self, user: UserAuth) -> QaulResult<Vec<UserProfile>> {
-//         let (ref my_id, ref token) = user.trusted()?;
-//         self.auth.verify_token(my_id, token)?;
-
-//         self.contacts
-//             .get_all(my_id)?
-//             .into_iter()
-//             .map(|ref id| self.users.get(id))
-//             .collect()
-//     }
-// }

@@ -133,10 +133,4 @@ impl<'qaul> Users<'qaul> {
         let (id, _) = self.q.auth.trusted(user)?;
         self.q.users.modify(id, update).await
     }
-
-    /// Validate that a `UserAuth` represents a currently logged in user
-    pub fn ok(&self, user: UserAuth) -> Result<()> {
-        self.q.auth.trusted(user)?;
-        Ok(())
-    }
 }

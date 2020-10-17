@@ -6,7 +6,7 @@ members = [
 
     # main qaul.net service library
     "libqaul",
-    # "libqaul/types",
+    "libqaul/types",
 
     # RPC libraries
     "rpc-layer/qrpc-sdk",

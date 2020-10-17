@@ -2,32 +2,24 @@
 //!
 //! A modular and configurable internet overlay server for qaul.net.
 
-mod cfg;
+// mod cfg;
 mod log;
-mod state;
-mod upnp;
+// mod state;
+// mod upnp;
 
-use async_std::{future, task, task::Poll};
-use state::State;
-use std::time::Duration;
-
-use async_std::{future, task, task::Poll};
+use async_std::{future, task::Poll};
 use qrpc_broker::Broker;
-use std::time::Duration;
-use tracing::error;
 
-pub(crate) fn elog<S: Into<String>>(msg: S, code: u16) -> ! {
-    tracing::error!("{}", msg.into());
-    std::process::exit(code.into());
-}
-
-use qrpc_sdk::RpcSocket;
+// pub(crate) fn elog<S: Into<String>>(msg: S, code: u16) -> ! {
+//     tracing::error!("{}", msg.into());
+//     std::process::exit(code.into());
+// }
 
 #[async_std::main]
 async fn main() {
     log::parse_log_level();
 
-    let b = Broker::new().await;
+    let _b = Broker::new().await;
 
     // let app = cfg::cli();
     // let cfg = cfg::match_fold(app);

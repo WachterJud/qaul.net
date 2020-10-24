@@ -52,7 +52,7 @@ members = [
     # "utils/android-tracing",
 
     # test binaries
-    # "clients/multinode-test",
+    "clients/multinode-test",
     # "clients/linux-http-test",
     # "clients/linux-voice-test",
     # "clients/mini-tcp",

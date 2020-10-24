@@ -1,5 +1,5 @@
 [package]
-name = "libqaul-rpc"
+name = "libqaul-rpc1"
 version = "0.1.0"
 authors = ["Kaiden Fey <kookie@spacekookie.de>"]
 edition = "2018"

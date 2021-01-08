@@ -18,7 +18,7 @@ tracing-futures = "0.2"
 twox-hash = "1.5"
 
 # Sub-components
-identity = { version = "0.5", path = "identity", package = "ratman-identity", features = ["digest", "random"] }
+identity = { version ="0.6.0", path = "identity", package = "ratman-identity", features = ["digest", "random"] }
 netmod = { version = "0.3", path = "netmod", package = "ratman-netmod"}
 clockctrl = { version = "0.1", path = "../utils/clockctrl" }
 async-notify = { path = "../utils/async-notify" }

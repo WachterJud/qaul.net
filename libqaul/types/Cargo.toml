@@ -2,11 +2,11 @@
 name = "libqaul-types"
 description = "libqaul type fascade"
 version = "0.1.0"
-authors = ["Kaiden Fey <kookie@spacekookie.de>"]
+authors = ["Katharina Fey <kookie@spacekookie.de>"]
 edition = "2018"
 
 [dependencies]
-ratman-identity = { version = "0.5", path = "../../ratman/identity", features = ["random"] }
+ratman-identity = { version ="0.6.0", path = "../../ratman/identity", features = ["random"] }
 serde = { version = "1.0", features = ["derive"] }
 alexandria-tags = { path = "../../utils/alexandria-tags" }
 

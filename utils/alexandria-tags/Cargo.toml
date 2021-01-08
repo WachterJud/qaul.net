@@ -2,7 +2,7 @@
 name = "alexandria-tags"
 description = "Alexandria search tag system"
 version = "0.1.0"
-authors = ["Kaiden Fey <kookie@spacekookie.de>"]
+authors = ["Katharina Fey <kookie@spacekookie.de>"]
 license = "GPL-3.0-or-later"
 edition = "2018"
 

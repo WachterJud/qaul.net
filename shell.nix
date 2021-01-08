@@ -8,7 +8,9 @@ stdenv.mkDerivation {
   buildInputs = with pkgs; [
 
     # General rust stuff
-    rustup clangStdenv cargo-watch
+    rustc
+
+    clangStdenv cargo-watch
     binutils # rustracer -- currently broken
     
     # Required for the docs

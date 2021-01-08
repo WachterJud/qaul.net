@@ -2,7 +2,7 @@
 name = "hubdctl"
 description = "A control RPC client for qaul-hubd"
 version = "0.1.0"
-authors = ["Kaiden Fey <kookie@spacekookie.de>"]
+authors = ["Katharina Fey <kookie@spacekookie.de>"]
 edition = "2018"
 license = "GPL-3.0"
 

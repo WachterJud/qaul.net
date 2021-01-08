@@ -10,5 +10,5 @@ license = "AGPL-3.0"
 async-std = { version = "=1.5", features = ["attributes", "unstable"] }
 async-trait = "0.1"
 crossbeam-channel = "0.4"
-ratman-identity = { version = "0.5", path = "../../ratman/identity", package = "ratman-identity", features = [ "digest" ] }
+ratman-identity = { version ="0.6.0", path = "../../ratman/identity", package = "ratman-identity", features = [ "digest" ] }
 ratman-netmod = { version = "0.3", path = "../../ratman/netmod", package = "ratman-netmod" }

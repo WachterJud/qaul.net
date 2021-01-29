@@ -281,7 +281,7 @@ impl Peer {
     /// Start an async worker to send packets to this peer
     ///
     /// The worker can be stopped after spawning by calling `stop()`.
-    /// If at any time sending was'n successful, this loop will
+    /// If at any time sending wasn't successful, this loop will
     /// automatically re-init the connection.
     ///
     /// There's currently no way to get diagnostics from failed sends

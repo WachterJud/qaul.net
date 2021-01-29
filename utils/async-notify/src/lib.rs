@@ -8,7 +8,7 @@ use std::task::Waker;
 
 /// A wrapper which wakes tasks on mutable accesses to the wrapped value.
 ///
-/// This can be used to transparently notify an asyncronous task that it
+/// This can be used to transparently notify an asynchronous task that it
 /// should, for example, check for more work in a queue or try again to
 /// acquire a lock.
 #[derive(Default, Debug, Clone)]

@@ -1,4 +1,4 @@
-//! Service inteface utilities
+//! Service interface utilities
 
 use crate::{
     error::{Error, Result},
@@ -17,10 +17,10 @@ pub(crate) use self::store::MetadataStore;
 /// Represents a service using libqaul
 ///
 /// Via this type it's possible to either perform actions as a
-/// particular survice, or none, which means that all service's events
+/// particular service, or none, which means that all service's events
 /// become available.  While this is probably not desirable (and
 /// should be turned off) in most situations, this way a user-level
-/// service can do very powerful things with the "raw" netork traffic
+/// service can do very powerful things with the "raw" network traffic
 /// of a qaul network.
 #[derive(Debug, Clone, Eq, PartialEq, Hash, Serialize, Deserialize)]
 pub enum Service {

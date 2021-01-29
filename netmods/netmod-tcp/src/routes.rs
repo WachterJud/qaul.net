@@ -1,8 +1,8 @@
 //! Route management module
 //!
-//! Because ratman performes route lookups via public key IDs, we need
+//! Because ratman performs route lookups via public key IDs, we need
 //! to keep a mapping from target ID to IP addresses.  Furthermore,
-//! beacuse TCP is meant to be client-server, we also need to make
+//! because TCP is meant to be client-server, we also need to make
 //! sure that we can establish a DUPLEX link with each peer.
 //!
 //! A lot of this logic is handled directly in `peer.rs`, while this

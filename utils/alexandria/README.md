@@ -4,7 +4,7 @@
 [irc-url]: https://www.irccloud.com/invite?channel=%23qaul.net&hostname=irc.freenode.org&port=6697&ssl=1
 
 
-Strongly typed, embedded record database with seemless encryption at
+Strongly typed, embedded record database with seamless encryption at
 rest storage.  Supports key-value Diff transactions, as well as
 externally loaded binary payloads.  Supports encrypted metadata
 without extra configuration.

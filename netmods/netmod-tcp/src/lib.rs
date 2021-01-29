@@ -24,7 +24,7 @@ use serde::{Deserialize, Serialize};
 use std::net::SocketAddr;
 use tracing::{error, info, trace};
 
-/// Define the runtime mode for this endpount
+/// Define the runtime mode for this endpoint
 ///
 /// In dynamic mode any new peer can introduce itself to start a link,
 /// while in static mode only known peers will be accepted.
@@ -34,7 +34,7 @@ pub enum Mode {
     Dynamic,
 }
 
-/// Specify the conneciton types used by this node
+/// Specify the connection types used by this node
 ///
 /// By default netmod-tcp tries to establish bi-directional
 /// connections, meaning that two nodes each have a dedicated

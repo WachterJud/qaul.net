@@ -1,7 +1,7 @@
 //! libqaul specific storage wrappers
 //!
 //! The database and storage library in use is called alexandria,
-//! which encodes data as diffs.  This module is repsonsible for
+//! which encodes data as diffs.  This module is responsible for
 //! making Diffs and records map onto each other.  Each operation on a
 //! type yields in a diff that the storage system can then apply, and
 //! reading a data type from a record.

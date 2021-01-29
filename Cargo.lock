@@ -1745,6 +1745,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "qaul-linux"
+version = "0.1.0"
+dependencies = [
+ "async-std",
+ "libqaul",
+ "netmod-mem",
+ "qaul-chat",
+ "ratman",
+ "ratman-netmod",
+]
+
+[[package]]
 name = "qaul-voice"
 version = "0.1.0"
 dependencies = [

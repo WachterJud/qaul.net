@@ -2,7 +2,7 @@
 
 use crate::Responder;
 use async_std::sync::Arc;
-use libqaul_rpc::{
+use libqaul_rpc1::{
     json::{RequestEnv, ResponseEnv},
     Envelope,
 };

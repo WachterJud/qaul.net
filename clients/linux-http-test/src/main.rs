@@ -7,7 +7,7 @@ use std::{env, process};
 use {
     libqaul::Qaul,
     libqaul_http::{stream, HttpServer},
-    libqaul_rpc::Responder,
+    libqaul_rpc1::Responder,
     qaul_chat::Chat,
     qaul_voice::Voice,
 };

@@ -9,7 +9,7 @@
 pub(crate) mod rpc_harness {
     use async_std::sync::Arc;
     use libqaul::Qaul;
-    use libqaul_rpc::{
+    use libqaul_rpc1::{
         json::{RequestEnv, ResponseEnv},
         Envelope, Response, StreamResponder, Streamer,
     };
@@ -24,7 +24,7 @@ pub(crate) mod rpc_harness {
         async fn respond(self: Arc<Self>, _: Response) {}
     }
 
-    pub type Responder = libqaul_rpc::Responder<FakeStream>;
+    pub type Responder = libqaul_rpc1::Responder<FakeStream>;
 
     /// RPC test state
     pub(crate) struct RPC {

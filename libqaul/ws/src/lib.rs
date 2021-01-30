@@ -4,7 +4,7 @@
 #![doc(html_logo_url = "https://qaul.net/img/qaul_icon-128.png")]
 
 use libqaul::Qaul;
-use libqaul_rpc::{
+use libqaul_rpc1::{
     json::{RequestEnv, ResponseEnv},
     Envelope,
 };
@@ -25,7 +25,7 @@ use std::sync::atomic::{AtomicBool, Ordering};
 mod stream;
 pub use stream::StreamResp;
 
-pub type Responder = libqaul_rpc::Responder<StreamResp>;
+pub type Responder = libqaul_rpc1::Responder<StreamResp>;
 
 /// Websocket server structure
 pub struct WsServer {

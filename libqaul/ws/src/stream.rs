@@ -1,5 +1,5 @@
 use async_trait::async_trait;
-use libqaul_rpc::{Response, StreamResponder, Streamer};
+use libqaul_rpc1::{Response, StreamResponder, Streamer};
 use std::sync::Arc;
 use tracing::warn;
 

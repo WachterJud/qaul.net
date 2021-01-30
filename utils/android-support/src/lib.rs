@@ -27,7 +27,7 @@ mod utils;
 
 // use libqaul::{users::UserAuth, Qaul};
 // use libqaul_http::{stream, HttpServer};
-// use libqaul_rpc::Responder;
+// use libqaul_rpc1::Responder;
 // use qaul_chat::Chat;
 // use qaul_voice::Voice;
 // use ratman_configure::{EpBuilder, NetBuilder};

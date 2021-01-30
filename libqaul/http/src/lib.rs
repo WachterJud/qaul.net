@@ -25,7 +25,7 @@ pub(crate) use stream::StreamResp;
 ///
 /// This type hides generics on the Responder type to make it easier
 /// to initialise the streaming context for Http purposes.
-pub type Responder = libqaul_rpc::Responder<StreamResp>;
+pub type Responder = libqaul_rpc1::Responder<StreamResp>;
 
 /// State structure for the libqaul http server
 pub struct HttpServer {

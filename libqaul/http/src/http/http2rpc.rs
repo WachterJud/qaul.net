@@ -3,7 +3,7 @@
 
 use crate::Responder;
 use async_std::sync::Arc;
-use libqaul_rpc::{
+use libqaul_rpc1::{
     json::{JsonAuth, JsonMap, RequestEnv},
     Envelope,
 };
@@ -134,14 +134,14 @@ pub async fn http2rpc_params_query(
 
     // Return success or error code values
     let return_code = match &resp {
-        libqaul_rpc::Response::Error(s) => {
+        libqaul_rpc1::Response::Error(s) => {
             if s.starts_with("Not authorised") {
                 401
             } else {
                 400
             }
         }
-        libqaul_rpc::Response::Success => {
+        libqaul_rpc1::Response::Success => {
             // return empty body when there is only the generic Success message
             return Response::new(204).body_string("".to_string());
         }

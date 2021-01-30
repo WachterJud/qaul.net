@@ -8,7 +8,7 @@ license = "AGPL-3.0"
 
 [dependencies]
 libqaul = { path = ".." }
-libqaul-rpc = { path = "../rpc" }
+libqaul-rpc1 = { path = "../rpc" }
 
 async-std = "1.0"
 async-trait = "0.1"

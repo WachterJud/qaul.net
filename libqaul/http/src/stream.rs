@@ -1,7 +1,7 @@
 //! Handles stream responeses (at some point)
 
 use async_trait::async_trait;
-use libqaul_rpc::{Response, Streamer, StreamResponder};
+use libqaul_rpc1::{Response, Streamer, StreamResponder};
 use std::sync::Arc;
 use tracing::warn;
 

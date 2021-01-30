@@ -1,16 +1,23 @@
 [package]
 name = "qaul-linux"
 version = "0.1.0"
-authors = ["Katharina Fey <kookie@spacekookie.de>"]
+authors = ["qaul.net Community"]
 edition = "2018"
 license = "GPL-3.0"
 
 [dependencies]
 libqaul = { path = "../../libqaul" }
 chat = { path = "../../libqaul/service/chat", package = "qaul-chat" }
-
+netmod-tcp = { path = "../../netmods/netmod-tcp" }
+netmod-udp = { path = "../../netmods/netmod-udp" }
 ratman = { path = "../../ratman" }
-ratman-netmod = { path = "../../ratman/netmod" }
-netmod-mem = { path = "../../netmods/netmod-mem" }
+ratman-configure = { path = "../../ratman/configure" }
 
-async-std = "=1.5"
+async-std = { version = "=1.5", features = ["attributes"] }
+clap = { version = "2.0", features = ["wrap_help", "color"] }
+directories = "2.0"
+igd = "0.11"
+tracing = "0.1"
+tracing-subscriber = { version = "0.2", features = ["fmt", "env-filter"] }
+pnet = "0.26"
+ipnetwork = "0.16"

@@ -24,7 +24,7 @@ impl State {
         Default::default()
     }
 
-    /// Poll for completed messages from teh outside world
+    /// Poll for completed messages from the outside world
     #[tracing::instrument(skip(self), level = "trace")]
     pub(super) async fn completed(&self) -> Message {
         let done = Arc::clone(&self.done);

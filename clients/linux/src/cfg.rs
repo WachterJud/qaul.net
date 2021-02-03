@@ -4,7 +4,7 @@ use ratman_configure::config::{Endpoint, Network, Params};
 use std::collections::BTreeMap;
 use std::{env, fs::File, io::Read, path::PathBuf, sync::Arc};
 
-/// The hub configuration
+/// The app configuration
 #[derive(Debug, Clone)]
 pub(crate) struct Config {
     /// Path to initial peer set
@@ -19,6 +19,8 @@ pub(crate) struct Config {
     pub(crate) no_upnp: bool,
     /// Disable multicast local discovery
     pub(crate) no_multicast: bool,
+    /// Web GUI path
+    pub(crate) webgui: String,
 }
 
 impl Config {
@@ -58,7 +60,7 @@ impl Config {
 }
 
 pub(crate) fn cli<'a>() -> App<'a, 'a> {
-    App::new("qaul-hubd")
+    App::new("qaul-linux")
         .about(env!("CARGO_PKG_DESCRIPTION"))
         .version(env!("CARGO_PKG_VERSION"))
         .arg(
@@ -78,7 +80,7 @@ pub(crate) fn cli<'a>() -> App<'a, 'a> {
                 .value_name("MODE")
                 .default_value("static")
                 .possible_values(&["static", "dynamic"])
-                .help("The hub's run mode"),
+                .help("qaul's run mode"),
         )
         .arg(
             Arg::with_name("SOCKET_ADDR")
@@ -87,7 +89,7 @@ pub(crate) fn cli<'a>() -> App<'a, 'a> {
                 .takes_value(true)
                 .value_name("ADDR")
                 .default_value("0.0.0.0")
-                .help("The hub's bound socket address"),
+                .help("qaul's bound socket address"),
         )
         .arg(
             Arg::with_name("SOCKET_PORT")
@@ -96,7 +98,7 @@ pub(crate) fn cli<'a>() -> App<'a, 'a> {
                 .takes_value(true)
                 .required(true)
                 .value_name("PORT")
-                .help("The hub's bound socket port"),
+                .help("qaul bound socket port"),
         )
         .arg(
             Arg::with_name("NO_UPNP")
@@ -105,7 +107,11 @@ pub(crate) fn cli<'a>() -> App<'a, 'a> {
         ).arg(
             Arg::with_name("NO_UDP_DISCOVER")
                 .long("no-udp-discover")
-                .help("Prevent qaul-hubd from registering a multicast address to find other clients on the same network")
+                .help("Prevent qaul from registering a multicast address to find other clients on the same network")
+        ).arg(
+            Arg::with_name("WEBGUI_PATH")
+                .long("webgui-path")
+                .help("Path to the WebGUI.")
         )
 }
 
@@ -120,7 +126,10 @@ pub(crate) fn match_fold<'a>(app: App<'a, 'a>) -> Config {
 
     Config {
         peers: {
-            let p = m.value_of("PEERS_PATH").map(|s| s.to_owned()).unwrap();
+            let p = m.value_of("PEERS_PATH")
+                            .map(|s| s.to_owned())
+                            .or(env::var("QAUL_PEERS").ok())
+                            .unwrap();
             let mut buf = PathBuf::new();
             buf.push(p);
             buf
@@ -128,21 +137,26 @@ pub(crate) fn match_fold<'a>(app: App<'a, 'a>) -> Config {
         mode: m
             .value_of("RUN_MODE")
             .map(|s| s.to_owned())
-            .or(env::var("QAUL_HUBD_MODE").ok())
+            .or(env::var("QAUL_MODE").ok())
             .unwrap_or("static".into()),
         addr: m
             .value_of("SOCKET_ADDR")
             .map(|s| s.to_owned())
-            .or(env::var("QAUL_HUBD_ADDR").ok())
+            .or(env::var("QAUL_ADDR").ok())
             .unwrap_or("0.0.0.0".into()),
         port: m
             .value_of("SOCKET_PORT")
             .map(|s| str::parse(s).unwrap())
-            .or(env::var("QAUL_HUBD_PORThat")
+            .or(env::var("QAUL_PORT")
                 .ok()
                 .map(|s| str::parse(&s).unwrap()))
             .unwrap_or(9001),
         no_upnp: m.is_present("NO_UPNP"),
         no_multicast: m.is_present("NO_UDP_DISCOVER"),
+        webgui: m
+            .value_of("WEBGUI_PATH")
+            .map(|s| s.to_owned())
+            .or(env::var("QAUL_WEBGUI_PATH").ok())
+            .unwrap_or("emberweb/dist".into()),
     }
 }

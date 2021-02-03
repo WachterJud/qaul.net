@@ -2,11 +2,18 @@
 
 use crate::cfg::Config;
 use directories::ProjectDirs;
-use libqaul::Qaul;
 use netmod_tcp::{Endpoint, Mode};
 use ratman::Router;
 use std::collections::HashSet;
 use std::{fs::File, io::Read, net::SocketAddr, str::FromStr, sync::Arc};
+use async_std::{task, task::spawn};
+use {
+    libqaul::{users::UserUpdate, Qaul},
+    libqaul_http::{stream, HttpServer},
+    libqaul_rpc1::Responder,
+    qaul_chat::Chat,
+    qaul_voice::Voice,
+};
 
 #[allow(unused)]
 pub(crate) struct State {
@@ -20,7 +27,7 @@ impl State {
         let ep = Endpoint::new(
             &cfg.addr,
             cfg.port,
-            "qaul-hubd",
+            "qaul-linux",
             match cfg.mode.as_str() {
                 "dynamic" => Mode::Dynamic,
                 _ => Mode::Static,
@@ -41,6 +48,38 @@ impl State {
 
         let dirs = ProjectDirs::from("net", "qaul", "hubd").unwrap();
         let qaul = Qaul::new(Arc::clone(&router));
+
+        // services
+        let chat = Chat::new(Arc::clone(&qaul)).await.unwrap();
+        let voices = Voice::new(Arc::clone(&qaul)).await.unwrap();
+
+        // print information for the user
+        println!("Path to static web content: {}", cfg.webgui);
+        println!("Open the UI in your web browser:");
+        println!("WebGUI: http://127.0.0.1:9900");
+
+        // configure the web servers
+        let server = HttpServer::set_paths(
+            cfg.webgui.clone(),
+            Responder {
+                streamer: stream::setup_streamer(),
+                qaul: Arc::clone(&qaul),
+                chat: chat,
+                voice: voices,
+            },
+        );
+
+        task::spawn(async move {
+            let http = server.listen("127.0.0.1:9900");
+        });
+        /*
+        // run the servers
+        task::block_on(async move {
+            let a = server_a.listen("127.0.0.1:9900");
+            let b = server_b.listen("127.0.0.1:9901");
+            try_join!(a, b).unwrap();
+        });
+*/
 
         Self { qaul, router }
     }

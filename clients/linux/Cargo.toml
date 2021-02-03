@@ -6,12 +6,15 @@ edition = "2018"
 license = "GPL-3.0"
 
 [dependencies]
-libqaul = { path = "../../libqaul" }
-chat = { path = "../../libqaul/service/chat", package = "qaul-chat" }
 netmod-tcp = { path = "../../netmods/netmod-tcp" }
 netmod-udp = { path = "../../netmods/netmod-udp" }
 ratman = { path = "../../ratman" }
 ratman-configure = { path = "../../ratman/configure" }
+libqaul = { path = "../../libqaul" }
+libqaul-rpc1 = { path = "../../libqaul/rpc", features = ["chat", "json"] }
+libqaul-http = { path = "../../libqaul/http" }
+qaul-chat = { path = "../../libqaul/service/chat" }
+qaul-voice = { path = "../../libqaul/service/voice" }
 
 async-std = { version = "=1.5", features = ["attributes"] }
 clap = { version = "2.0", features = ["wrap_help", "color"] }

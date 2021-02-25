@@ -1,11 +1,8 @@
 # qaul-hubd
 
-A modular and configurable internet overlay server for qaul.net.
-Supports static and semi-dynamic peering over Tcp and Udp.  Used for
-backbone infrastructure (routers, extenders, antenna-arrays), and
-development testing.
+`qaul-hubd` is a qaul.net daemon to run on servers and routers.
+It can be used to create an Internet overlay network.
 
-An open test network is available at `hyperion.kookie.space:11443`
 
 Learn more about `qaul-hubd` in the [user manual]!
 

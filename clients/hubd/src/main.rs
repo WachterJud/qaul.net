@@ -37,7 +37,5 @@ async fn main() {
         });
     }
 
-    let _ = future::timeout(Duration::from_secs(10), async {
-        let _: () = future::poll_fn(|_| Poll::Pending).await;
-    }).await;
+    let _: () = future::poll_fn(|_| Poll::Pending).await;
 }

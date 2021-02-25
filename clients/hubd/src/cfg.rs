@@ -138,7 +138,7 @@ pub(crate) fn match_fold<'a>(app: App<'a, 'a>) -> Config {
         port: m
             .value_of("SOCKET_PORT")
             .map(|s| str::parse(s).unwrap())
-            .or(env::var("QAUL_HUBD_PORThat")
+            .or(env::var("QAUL_HUBD_PORT")
                 .ok()
                 .map(|s| str::parse(&s).unwrap()))
             .unwrap_or(9001),

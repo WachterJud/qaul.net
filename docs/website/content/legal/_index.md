@@ -1,4 +1,0 @@
----
-title: "Legal"
----
-# Legal

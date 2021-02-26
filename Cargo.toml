@@ -12,13 +12,6 @@ members = [
     # "libqaul/rpc",
     # "libqaul/ws",
 
-    # RPC libraries
-    "rpc-layer/qrpc-sdk",
-    "rpc-layer/rpc-broker",
-    "rpc-layer/libqaul-rpc",
-    "rpc-layer/ratman-rpc",
-    "rpc-layer/service-rpc",
-
     # qaul.net main services
     "libqaul/service/chat",
     "libqaul/service/files",

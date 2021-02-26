@@ -2,8 +2,6 @@
 
 ---
 
-[![Built with Nix](https://builtwithnix.org/badge.svg)](https://builtwithnix.org)
-
 **qaul** is a decentralised networking project, aiming to create 
 easy-to-use solutions for ad-hoc wireless communication.  It
 supports many common desktop operating systems (Linux, Windows,
@@ -33,9 +31,7 @@ additional information in their respective README files.
 | [libqaul]   | Core library of the qaul.net ecosystem.  Provides networking abstractions, user management and discovery |
 | [licenses]  | Set of license texts that are in use in this repository |
 | [netmods]   | Platform-specific networking interface drivers |
-| [nix]       | [Nix](https://nixos.org) related build utilities |
 | [ratman]    | A decentralised and modular userspace frame router |
-| [rpc-layer] | qaul.net specific rpc system (qrpc) to support third-party components |
 | [tests]     | Integrated test suite for various components.  Most of the code also has inline tests |
 | [utils]     | Set of utilities that are used in various places and don't fit anywhere else |
 
@@ -45,9 +41,7 @@ additional information in their respective README files.
 [libqaul]: ./libqaul
 [licenses]: ./licenses
 [netmods]: ./netmods
-[nix]: ./nix
 [ratman]: ./ratman
-[rpc-layer]: ./rpc-layer
 [tests]: ./tests
 [utils]: ./utils
 

@@ -1,9 +1,0 @@
-[package]
-name = "qrpc-sdk"
-description = "A client SDK to build qrpc (qaul rpc) extensions"
-version = "0.1.0"
-authors = ["Kaiden Fey <kookie@spacekookie.de>"]
-edition = "2018"
-
-[dependencies]
-capnp = "*"

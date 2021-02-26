@@ -388,12 +388,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "706dc7e15f69ff189608e09a6c78c8c7af55464377b3f7573524f32f1a23a6bf"
 
 [[package]]
-name = "capnp"
-version = "0.13.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "739fa606458e49df64116a3cda1bf711ada360ce714357674d0950ed2132a6a1"
-
-[[package]]
 name = "cc"
 version = "1.0.55"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1396,16 +1390,12 @@ dependencies = [
 ]
 
 [[package]]
-name = "libqaul-rpc"
-version = "0.1.0"
-
-[[package]]
 name = "libqaul-rpc1"
 version = "0.1.0"
 dependencies = [
  "async-std",
  "async-trait",
- "capnp 0.12.4",
+ "capnp",
  "conjoiner-engine",
  "crossbeam-queue",
  "failure",
@@ -2078,13 +2068,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "qrpc-sdk"
-version = "0.1.0"
-dependencies = [
- "capnp 0.13.3",
-]
-
-[[package]]
 name = "quick-error"
 version = "1.2.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2235,10 +2218,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "ratman-rpc"
-version = "0.1.0"
-
-[[package]]
 name = "redox_syscall"
 version = "0.1.56"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2303,14 +2282,6 @@ name = "route-recognizer"
 version = "0.1.13"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ea509065eb0b3c446acdd0102f0d46567dc30902dc0be91d6552035d92b0f4f8"
-
-[[package]]
-name = "rpc-broker"
-version = "0.1.0"
-dependencies = [
- "capnp 0.13.3",
- "qrpc-sdk",
-]
 
 [[package]]
 name = "rubato"
@@ -2451,10 +2422,6 @@ dependencies = [
  "percent-encoding 1.0.1",
  "serde",
 ]
-
-[[package]]
-name = "service-rpc"
-version = "0.1.0"
 
 [[package]]
 name = "sha2"

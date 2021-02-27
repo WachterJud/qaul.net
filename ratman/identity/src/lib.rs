@@ -14,11 +14,11 @@
 //! 2. Identities don't change mid-route
 //!
 //! This crate is part of the qaul.net project.  The docs for this
-//! crate are propably lacking because currently Ratman/ libqaul are
+//! crate are probably lacking because currently Ratman/ libqaul are
 //! the only users of it.  If you have questions, don't hesitate to
 //! [contact us]!
 //!
-//! [contact us]: https://docs.qaul.net/contributors/social/_intro.html
+//! [contact us]: https://docs.qaul.net/manual/social/_intro.html
 
 use cfg_if;
 use serde::{

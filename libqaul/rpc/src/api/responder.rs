@@ -62,10 +62,10 @@ impl<K: StreamResponder + Send + Sync + 'static> Responder<K> {
     // basically the same thing, and the switching logic stays in one
     // place.  If you need some context as to why this is required,
     // what it does, and how it actually works, there's an RPC chapter
-    // in the contributors guide for you to read up on these things.
+    // in the qaul.net manual for you to read up on these things.
     // If you have more questions afterwards, feel free to reach out
     // to us.  When touching this function, try to leave comments for
-    // anything that's not immediatly obvious.  Also: =^-^=!
+    // anything that's not immediately obvious.  Also: =^-^=!
     pub async fn respond(&self, req: Request) -> Response {
         // TODO: currently the ids all map into Response::UserId which is wrong
         match req {

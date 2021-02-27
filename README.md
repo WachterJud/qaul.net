@@ -1,27 +1,24 @@
-![](docs/banner.svg)
+# qaul.net – قول 
+## Internet Independent Wireless Mesh Communication App
 
----
+![http://qaul.net/](docs/qaul-net.png)
 
 **qaul** is a decentralised networking project, aiming to create 
-easy-to-use solutions for ad-hoc wireless communication.  It
-supports many common desktop operating systems (Linux, Windows,
-MacOS, BSD, …), and Android mobile phones.  iOS support is on
-the roadmap.
+a peer2peer wireless mesh communication app for **messaging**, 
+**filesharing**, and **voice calls**.
 
-**qaul.net** is both a cross-platform application, implementing
-**messaging**, **filesharing**, and **voice calls**, but also a
-**development toolkit** to create fully decentralised third-party
-applications.
-
+The project currently undergoes a complete rewrite in [Rust](https://rustlang.org).
 In order to be able to run on unpriviledged mobile platforms qaul.net
 implements **decentralised routing protocols** and utilities entirely
-in userspace.  The codebase is largely written in
-[Rust](https://rustlang.org), with only a few compatibility components
-being written in more platform specific languages.  All parts of the
-project are contained in this repository.
+in userspace.
+You are warmly invited to be part of this endeavour!
 
-Following is an overview of the available components.  Components have
-additional information in their respective README files.
+The old version 1.0 is in the independent [release-1.0.0](https://git.open-communication.net/qaul/qaul.net/-/tree/release-1.0.0) branch of this repository.
+
+
+## Components
+
+Components have additional information in their respective README files.
 
 | Component   | Description      |
 |-------------|------------------|
@@ -48,19 +45,11 @@ additional information in their respective README files.
 
 ## Overview
 
-Most traditional networking infrastructure (both the transmission
-layer, as well as applications) operate in a centralised way.
-Clients connect to servers, and devices to towers.  This makes the
-infrastructure vulnerable to attacks.  Natural disasters or opressive
-governments can easily shut down communication for millions of people,
-potentially putting them at risk, and slowing down or disrupting any
-organisation or activist movement.
-
 qaul.net aims to solve this issue by creating decentralised circuits
-between devices directly.  These direct device-to-device connections can
+between devices directly. These direct device-to-device connections can
 be imperfect and unstable.  qaul.net's routing approach takes these
 issues into account by caching undelivered messages, and carrying them
-towards their destination until the receipient comes back online.
+towards their destination until the recepient comes back online.
 
 Routing in a qaul.net network is done via a user's ed25519 public keys,
 creating a 32 byte large address space.  Connecting devices together happens
@@ -69,39 +58,24 @@ when creating a circuit, roaming between different connection types is normal,
 and no single technology has to work on all possible devices.
 
 To learn more about the technical side of qaul.net, check out the
-[contributor manual].
-
-## How to use
-
-There's no single way to use qaul.net.  Various platforms support
-different clients, and a qaul network can consist of many different
-components interacting with each other.  To get started, check out the
-[user manual]!
-
-[user manual]: https://docs.qaul.net/users
+[qaul.net manual].
 
 
-## Contributing
+## qaul.net Manual
 
+To join the development of qaul.net, read the qaul.net
 Social processes, code, and design guidelines are outlined in the
-[contributor manual].  We have a developer chat hosted on [Matrix]
-where we would be happy to answer any questions you have.  For more
-long-form posting we have a [mailing list].  We also accept patches
-via e-mail!
+[contributor manual].  
 
-If you want some inspiration for what you can do with qaul.net, check
-out the [services] section.
+[qaul.net manual]: https://docs.qaul.net/manual
 
-[contributor manual]: https://docs.qaul.net/contributors
-[Matrix]: https://matrix.to/#/!ljaaylfsbkWFYNoNPT:fairydust.space?via=fairydust.space&via=matrix.org&via=public.cat
-[mailing list]: https://lists.sr.ht/~qaul/community
-[services]: ./services
 
 ## License
 
 qaul.net is free software licensed under the
 [GNU Affero General Public License version 3](licenses/agpl-3.0.md) or
 later.
+
 
 **Additional Permissions:** For Submission to the Apple App Store:
 

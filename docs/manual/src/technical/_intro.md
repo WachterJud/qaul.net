@@ -1,14 +1,6 @@
 # Technical Documentation
 
-This is an introductory chapter into the technical layers of qaul.net!
-It is aimed at two different types of people:
-
-1. People wanting to contribute to the qaul.net core
-2. People wanting to write apps for a qaul network
-
-Before getting started, we need to cover a few basics in project
-structure.  Each section in this document has it's own sub-chapter
-that will go into more details.
+This is an introductory chapter into the technical layers of qaul.net.
 
 
 ## Introduction
@@ -27,7 +19,7 @@ that are exchanged.  The API of this library is called the "libqaul
 service API" in other parts of the docs.  An application written to
 use `libqaul` is called a "service".
 
-A service provicdes more specific functionality.  Not all services are
+A service provides more specific functionality.  Not all services are
 user-facing.  For example, a service can provide an easy interface to
 send rich-payload messages, that operates on a higher level than the
 libqaul service API.  Other services can then depend on this

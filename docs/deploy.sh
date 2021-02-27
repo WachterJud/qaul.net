@@ -1,17 +1,12 @@
 #!/bin/sh
 
-# build and upload the contributors manual
-cd contributors
+# build and upload the qaul.net manual
+cd manual
 ./deploy.sh
 cd ..
 
 # build and upload the HTTP-API documentation
 cd http-api
-./deploy.sh
-cd ..
-
-# build and upload the users manual
-cd users/
 ./deploy.sh
 cd ..
 

@@ -8,11 +8,10 @@ online under [https://docs.qaul.net](https://docs.qaul.net)**
 
 ## Guides
 
-* `contributors`: the contributors' guide introduces and explains the
-  structure of qaul.net and should guide you through the steps of how
-  to the project.
+* `manual`: the qaul.net manual introduces and explains the
+  structure of qaul.net and should guide you through the structure of
+  the project and shows you how to build it.
 * `http-api`: contains the documentation of the qaul.net http-api.
-* `index`: this folder contains the overview page.
 
 
 ## Build and Deploy

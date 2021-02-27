@@ -3,7 +3,7 @@
 The **web GUI** is the **HTML5 GUI** for qaul.net, which is
 qaul.net's default GUI.
 
-For how to develop, build and test the web GUI [read the chapter in the contributors' guide](https://docs.qaul.net/contributors/technical/webgui/_intro.html).
+For how to develop, build and test the web GUI [read the chapter in the manual](https://docs.qaul.net/manual/technical/webgui/_intro.html).
 
 
 ## Prequisites
@@ -39,5 +39,5 @@ Now you can open the WebGUI in your web browser: http://localhost:4200/
 
 ## Documentation
 
-More documentation you'll find in the contributors guide.
-[read the chapter in the contributors' guide](https://docs.qaul.net/contributors/technical/webgui/_intro.html).
+More documentation you'll find in the qaul.net manual.
+[read the chapter in the qaul.net manual](https://docs.qaul.net/manual/technical/webgui/_intro.html).

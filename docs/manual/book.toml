@@ -1,0 +1,13 @@
+[book]
+authors = ["qaul.net community"]
+multilingual = false
+src = "src"
+title = "qaul.net Manual"
+
+[build]
+create-missing = false
+
+[output.html]
+preferred-dark-theme = "navy"
+git-repository-url = "https://git.open-communication.net/qaul/qaul.net/-/tree/master/docs%2Fmanual"
+git-repository-icon = "fa-git"

@@ -1,6 +1,6 @@
 # qaul-linux - qaul.net linux client
 
-This client is still in it's early stage. It provides the 
+This client is still in it's early stage.
 
 
 ## Build & Run
@@ -53,5 +53,4 @@ In order for the qaul.net instance to connect to an Internet overlay network. Yo
 
 ```
 144.91.74.192:9001
-95.216.98.55:11443
 ```

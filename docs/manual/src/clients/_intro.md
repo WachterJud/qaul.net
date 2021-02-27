@@ -7,8 +7,9 @@ build, and configure them.
 
 | Client name | Desktop platforms | Mobile platform | Version |
 |-------------|-------------------|-----------------|---------|
+| [qaul-linux] | Linux                 |          | 0.1.0   |
 | [qaul-hubd] | Linux, MacOS      | -               | 0.1.0   |
-| [qauldroid] | -                 | Android         | 0.1.0   |
 
-[qaul-hubd]: ./qaul-hubd/_intro.md
-[qauldroid]: ./qauldroid/_intro.md
+
+[qaul-linux]: ./qaul-linux.md
+[qaul-hubd]: ./qaul-hubd.md
